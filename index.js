@@ -3,6 +3,9 @@ import csurf from "csurf";
 import cookieParser from "cookie-parser";
 import db from "./config/db.js";
 
+// Variable to track DB connection status
+let isDbConnected = false;
+
 // Crear APP
 const app = express();
 
@@ -20,8 +23,10 @@ try {
   await db.authenticate();
   db.sync();
   console.log("La conexion es correcta a la DB");
+  isDbConnected = true;
 } catch (error) {
   console.error("No se puede conectar", error);
+  isDbConnected = false;
 }
 
 // Habilitar Pug
@@ -31,7 +36,10 @@ app.set("views", "./views");
 // Definir la ruta Public
 app.use(express.static("public"));
 
-// Routing
+// Routing - Demo route
+app.get("/", (req, res) => {
+  res.render("index", { title: "Demo Conexión", dbStatus: isDbConnected });
+});
 
 // Definir el puerto
 const port = process.env.PORT || 3000;
