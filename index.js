@@ -36,9 +36,18 @@ app.set("views", "./views");
 // Definir la ruta Public
 app.use(express.static("public"));
 
+// Routing
+app.get("/auth/login", (req, res) => {
+  res.render("auth/login", { pagina: "Iniciar Sesión" });
+});
+
+app.get("/auth/registro", (req, res) => {
+  res.render("auth/registro", { pagina: "Crear Cuenta" });
+});
+
 // Routing - Demo route
 app.get("/", (req, res) => {
-  res.render("index", { title: "Demo Conexión", dbStatus: isDbConnected });
+  res.render("index", { title: "Inicio", dbStatus: isDbConnected, pagina: "Inicio" });
 });
 
 // Definir el puerto

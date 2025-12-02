@@ -1,0 +1,17 @@
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Ristorante Traditionale | #{pagina}
+        link(rel="stylesheet", href="/css/style.css")
+    body.min-h-screen.bg-crema.text-carbon.font-sans
+        nav.bg-vino.p-4.shadow-lg
+            .container.mx-auto.flex.justify-between.items-center
+                a.text-2xl.text-dorado.font-serif.font-bold(href="/") Ristorante Tradizionale
+                div
+                    a(class="text-crema mr-4 font-bold hover:text-dorado transition-colors" href="/auth/login") Iniciar Sesión
+                    a(class="text-crema font-bold hover:text-dorado transition-colors" href="/auth/registro") Registrarse
+
+        main(class="mx-auto container mt-10 px-2")
+            block contenido
