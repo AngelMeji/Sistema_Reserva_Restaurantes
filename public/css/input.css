@@ -12,3 +12,16 @@
     --font-serif: "Playfair Display", serif;
     --font-sans: "Lato", sans-serif;
 }
+
+/* Animación para mensajes de error */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

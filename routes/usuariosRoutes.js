@@ -4,6 +4,7 @@ import {
     autenticar,
     formularioRegistro,
     registrar,
+    cerrarSesion,
 } from "../controllers/usuariosController.js";
 
 const router = express.Router();
@@ -15,5 +16,8 @@ router.post("/login", autenticar);
 // ## Registro
 router.get("/registro", formularioRegistro);
 router.post("/registro", registrar);
+
+// ## Cerrar Sesión
+router.get("/cerrar-sesion", cerrarSesion);
 
 export default router;

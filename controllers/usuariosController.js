@@ -7,6 +7,7 @@ const formularioLogin = (req, res) => {
   res.render("auth/login", {
     tituloPagina: "Inicio de Sesión",
     csrfToken: req.csrfToken(),
+    usuario: req.usuario
   });
 };
 
@@ -31,6 +32,7 @@ const autenticar = async (req, res) => {
       tituloPagina: "Iniciar Sesion",
       errores: resultado.array(),
       csrfToken: req.csrfToken(),
+      usuario: req.usuario
     });
   }
 
@@ -46,6 +48,7 @@ const autenticar = async (req, res) => {
       tituloPagina: "Iniciar Sesion",
       csrfToken: req.csrfToken(),
       errores: [{ msg: "El usuario no existe" }],
+      usuario: req.usuario
     });
   }
 
@@ -55,6 +58,7 @@ const autenticar = async (req, res) => {
       tituloPagina: "Iniciar Sesion",
       csrfToken: req.csrfToken(),
       errores: [{ msg: "Contraseña incorrecta" }],
+      usuario: req.usuario
     });
   }
 
@@ -76,29 +80,30 @@ const formularioRegistro = (req, res) => {
   res.render("auth/registro", {
     tituloPagina: "Registro de Usuario",
     csrfToken: req.csrfToken(),
+    usuario: req.usuario
   });
 };
 
 const registrar = async (req, res) => {
   // Validaciones
-  await check("nombre")
+  await check("name")
     .notEmpty()
-    .withMessage("El nombre no puede estar vacio")
+    .withMessage("El nombre no puede estar vacío")
     .run(req);
 
   await check("email")
     .isEmail()
-    .withMessage("Esto no parece un correo")
+    .withMessage("El correo electrónico no es válido")
     .run(req);
 
   await check("password")
     .isLength({ min: 6 })
-    .withMessage("La contraseña debe ser al menos de 6 caracteres")
+    .withMessage("La contraseña debe tener al menos 6 caracteres")
     .run(req);
 
-  await check("repeat_password")
+  await check("password_confirmation")
     .equals(req.body.password)
-    .withMessage("La contraseña no es igual")
+    .withMessage("Las contraseñas no coinciden")
     .run(req);
 
   let resultado = validationResult(req);
@@ -111,14 +116,14 @@ const registrar = async (req, res) => {
       errores: resultado.array(),
       csrfToken: req.csrfToken(),
       usuario: {
-        nombre: req.body.nombre,
+        nombre: req.body.name,
         email: req.body.email,
       },
     });
   }
 
   // Extraer los datos
-  const { nombre, email, password } = req.body;
+  const { name, email, password } = req.body;
 
   // Validar que el usuario no exista
   const existeUsuario = await Usuario.findOne({
@@ -128,24 +133,53 @@ const registrar = async (req, res) => {
     return res.render("auth/registro", {
       tituloPagina: "Registro de Usuario",
       csrfToken: req.csrfToken(),
-      errores: [{ msg: "El usuario ya existe" }],
+      errores: [{ msg: "El correo electrónico ya está registrado" }],
       usuario: {
-        nombre: req.body.nombre,
+        nombre: req.body.name,
         email: req.body.email,
       },
     });
   }
 
-  const usuarios = await Usuario.create({
-    nombre,
-    email,
-    password,
-  });
+  // Crear el usuario con rol por defecto
+  try {
+    const usuario = await Usuario.create({
+      nombre: name,
+      email,
+      password,
+      rol: "recepcionista", // Rol por defecto para nuevos usuarios
+    });
+
+    // Autenticar automáticamente después del registro
+    const token = generarJWT({ id: usuario.id, nombre: usuario.nombre });
+
+    return res
+      .cookie("_token", token, {
+        httpOnly: true,
+      })
+      .redirect("/");
+  } catch (error) {
+    console.error("Error al crear usuario:", error);
+    return res.render("auth/registro", {
+      tituloPagina: "Registro de Usuario",
+      csrfToken: req.csrfToken(),
+      errores: [{ msg: "Error al crear el usuario. Intenta nuevamente" }],
+      usuario: {
+        nombre: req.body.name,
+        email: req.body.email,
+      },
+    });
+  }
+};
+
+const cerrarSesion = (req, res) => {
+  return res.clearCookie("_token").redirect("/");
 };
 
 export {
-    formularioLogin,
-    autenticar,
-    formularioRegistro,
-    registrar,
+  formularioLogin,
+  autenticar,
+  formularioRegistro,
+  registrar,
+  cerrarSesion,
 }

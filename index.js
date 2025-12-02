@@ -3,6 +3,7 @@ import csurf from "csurf";
 import cookieParser from "cookie-parser";
 import usuarioRoutes from "./routes/usuariosRoutes.js";
 import db from "./config/db.js";
+import { identificarUsuario } from "./middleware/identificarUsuario.js";
 
 // Variable to track DB connection status
 let isDbConnected = false;
@@ -37,12 +38,20 @@ app.set("views", "./views");
 // Definir la ruta Public
 app.use(express.static("public"));
 
+// Middleware para identificar usuario en todas las rutas
+app.use(identificarUsuario);
+
 // Routing
 app.use("/auth", usuarioRoutes);
 
 // Routing - Demo route
 app.get("/", (req, res) => {
-  res.render("index", { title: "Inicio", dbStatus: isDbConnected, pagina: "Inicio" });
+  res.render("index", {
+    title: "Inicio",
+    dbStatus: isDbConnected,
+    pagina: "Inicio",
+    usuario: req.usuario
+  });
 });
 
 // Definir el puerto

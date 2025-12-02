@@ -9,9 +9,16 @@ html(lang="es")
         nav.bg-vino.p-4.shadow-lg
             .container.mx-auto.flex.justify-between.items-center
                 a.text-2xl.text-dorado.font-serif.font-bold(href="/") Ristorante Tradizionale
-                div
-                    a(class="text-crema mr-4 font-bold hover:text-dorado transition-colors" href="/auth/login") Iniciar Sesión
-                    a(class="text-crema font-bold hover:text-dorado transition-colors" href="/auth/registro") Registrarse
+                div.flex.items-center.gap-4
+                    if usuario
+                        //- Usuario autenticado
+                        .flex.items-center.gap-4
+                            span.text-crema.font-bold Bienvenido, #{usuario.nombre}
+                            a.bg-dorado.text-vino.px-4.py-2.rounded.font-bold.hover_bg-opacity-90.transition-colors(href="/auth/cerrar-sesion") Cerrar Sesión
+                    else
+                        //- Usuario no autenticado
+                        a.text-crema.mr-4.font-bold.hover_text-dorado.transition-colors(href="/auth/login") Iniciar Sesión
+                        a.text-crema.font-bold.hover_text-dorado.transition-colors(href="/auth/registro") Registrarse
 
         main(class="mx-auto container mt-10 px-2")
             block contenido
