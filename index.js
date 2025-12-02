@@ -1,6 +1,7 @@
 import express from "express";
 import csurf from "csurf";
 import cookieParser from "cookie-parser";
+import usuarioRoutes from "./routes/usuariosRoutes.js";
 import db from "./config/db.js";
 
 // Variable to track DB connection status
@@ -37,13 +38,7 @@ app.set("views", "./views");
 app.use(express.static("public"));
 
 // Routing
-app.get("/auth/login", (req, res) => {
-  res.render("auth/login", { pagina: "Iniciar Sesión" });
-});
-
-app.get("/auth/registro", (req, res) => {
-  res.render("auth/registro", { pagina: "Crear Cuenta" });
-});
+app.use("/auth", usuarioRoutes);
 
 // Routing - Demo route
 app.get("/", (req, res) => {

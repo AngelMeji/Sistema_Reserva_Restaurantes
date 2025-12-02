@@ -1,6 +1,11 @@
 extends ../layout/index
 
 block contenido
+    if errores
+        div(class="max-w-md mx-auto my-10")
+            each error in errores
+                p.bg-red-600.text-white.uppercase.text-xs.text-center.p-2.mb-1.font-bold= error.msg
+
     .min-h-screen.flex.items-center.justify-center.py-12.px-4(style="background-color: #F2EAB20F;")
         .login-container.relative.w-full.max-w-md
             //- Decoración de uvas superior derecha
@@ -48,6 +53,7 @@ block contenido
                     
                     //- Formulario
                     form(method="POST" action="/auth/registro")
+                        input(type="hidden" name="_csrf" value=csrfToken )
                         .space-y-4
                             //- Campo Nombre
                             .form-group
