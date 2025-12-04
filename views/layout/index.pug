@@ -5,11 +5,13 @@ html(lang="es")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title Ristorante Traditionale | #{pagina}
         link(rel="stylesheet", href="/css/style.css")
+        link(href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet")
     body.min-h-screen.bg-crema.text-carbon.font-sans
         nav.bg-vino.p-4.shadow-lg
             .container.mx-auto.flex.justify-between.items-center
                 a.text-2xl.text-dorado.font-serif.font-bold(href="/") Ristorante Tradizionale
                 div.flex.items-center.gap-4
+                    a.bg-dorado.text-vino.px-4.py-2.rounded.font-bold.hover_bg-opacity-90.transition-colors(href="/reservas") Pedir Reserva
                     if usuario
                         //- Usuario autenticado
                         .flex.items-center.gap-4
@@ -22,3 +24,7 @@ html(lang="es")
 
         main(class="mx-auto container mt-10 px-2")
             block contenido
+        
+        script(src="https://unpkg.com/aos@2.3.1/dist/aos.js")
+        script.
+            AOS.init();
