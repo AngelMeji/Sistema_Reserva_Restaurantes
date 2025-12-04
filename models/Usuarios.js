@@ -24,7 +24,6 @@ const Usuario = db.define(
         rol: {
             type: DataTypes.ENUM("admin", "recepcionista", "mesero", "cliente"),
             allowNull: false,
-            defaultValue: "cliente",
         },
 
         telefono: {

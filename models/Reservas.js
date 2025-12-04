@@ -10,7 +10,7 @@ const Reserva = db.define(
             autoIncrement: true,
         },
 
-        id_cliente: {
+        id_usuario: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
@@ -76,7 +76,10 @@ const Reserva = db.define(
                     // Duración por defecto: 2 horas
                     const [h, m] = reserva.hora_inicio.split(":").map(Number);
                     const fin = new Date();
-                    fin.setHours(h + 2, m, 0);
+                    fin.setHours(h, m, 0);
+
+                    // Sumar 1 hora y 30 minutos
+                    fin.setMinutes(fin.getMinutes() + 90);
 
                     reserva.hora_fin = `${fin.getHours().toString().padStart(2, "0")}:${fin.getMinutes().toString().padStart(2, "0")}:00`;
                 }

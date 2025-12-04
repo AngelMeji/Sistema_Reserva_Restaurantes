@@ -1,6 +1,9 @@
 extends layout/index
+include mixins/errores
 
 block contenido
+    +mostrarErrores(errores)
+    
     // Reservation Form Section
     section.py-20.bg-white.rounded-xl.shadow-2xl.my-16(data-aos="fade-up")
         .container.mx-auto.px-6
@@ -9,30 +12,31 @@ block contenido
                 | Completa el formulario para reservar una mesa en nuestro restaurante. Nos pondremos en contacto para confirmar tu reserva.
             // Form
             form(action="/reservas" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6")
+                input(type="hidden" name="_csrf" value=csrfToken)
                 // Nombre
                 .flex.flex-col
                     label(for="nombre" class="text-lg font-medium text-carbon mb-2") Nombre
-                    input#nombre(type="text" name="nombre" required class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
+                    input#nombre(type="text" name="nombre" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
                 // Email
                 .flex.flex-col
                     label(for="email" class="text-lg font-medium text-carbon mb-2") Email
-                    input#email(type="email" name="email" required class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
+                    input#email(type="email" name="email" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
                 // Teléfono
                 .flex.flex-col
                     label(for="telefono" class="text-lg font-medium text-carbon mb-2") Teléfono
-                    input#telefono(type="tel" name="telefono" required class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
+                    input#telefono(type="tel" name="telefono" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
                 // Fecha de reserva
                 .flex.flex-col
                     label(for="fecha_reserva" class="text-lg font-medium text-carbon mb-2") Fecha
-                    input#fecha_reserva(type="date" name="fecha_reserva" required class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
+                    input#fecha_reserva(type="date" name="fecha_reserva" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
                 //- Hora inicio
                 .flex.flex-col
                     label(for="hora_inicio" class="text-lg font-medium text-carbon mb-2") Hora de inicio
-                    input#hora_inicio(type="time" name="hora_inicio" required class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
+                    input#hora_inicio(type="time" name="hora_inicio" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
                 // Número de personas
                 .flex.flex-col
                     label(for="numero_personas" class="text-lg font-medium text-carbon mb-2") Número de personas
-                    input#numero_personas(type="number" name="numero_personas" min="1" required class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
+                    input#numero_personas(type="number" name="numero_personas" min="1" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
                 // Canal (oculto, valor "web")
                 input(type="hidden" name="canal" value="web")
                 // Observaciones

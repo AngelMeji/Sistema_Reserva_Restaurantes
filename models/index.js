@@ -1,5 +1,4 @@
 import Usuario from "./Usuarios.js";
-import Cliente from "./Clientes.js";
 import Mesa from "./Mesas.js";
 import Reserva from "./Reservas.js";
 import ConfiguracionRestaurante from "./ConfiguracionRestaurante.js";
@@ -17,4 +16,4 @@ Mesa.hasMany(Reserva, { foreignKey: "id_mesa" });
 Reserva.belongsTo(Usuario, { foreignKey: "creado_por" });
 Usuario.hasMany(Reserva, { foreignKey: "creado_por" });
 
-export { Cliente, Mesa, Usuario, Reserva, ConfiguracionRestaurante, HorarioAtencion };
+export { Usuario, Mesa, Reserva, ConfiguracionRestaurante, HorarioAtencion };

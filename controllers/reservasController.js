@@ -1,21 +1,28 @@
-// reservasController.js
-// Controller for handling reservation views and creation
-import Reserva from "../models/Reservas.js";
+import { validationResult } from "express-validator";
+import { Usuario, Reserva } from "../models/index.js";
 
-/**
- * Render the reservation form view.
- */
-export const mostrarFormulario = (req, res) => {
+const mostrarFormulario = (req, res) => {
     res.render("reservas", {
         title: "Hacer Reserva",
+        csrfToken: req.csrfToken(),
         usuario: req.usuario,
     });
 };
 
-/**
- * Process reservation form submission and create a new reservation record.
- */
-export const crearReserva = async (req, res) => {
+const crearReserva = async (req, res) => {
+    // Validación
+    let resultado = validationResult(req);
+
+    if (!resultado.isEmpty()) {
+        return res.status(400).render("reservas", {
+            title: "Hacer Reserva",
+            errores: resultado.array(),
+            usuario: req.usuario,
+            csrfToken: req.csrfToken(),
+            datos: req.body,
+        });
+    }
+    
     try {
         const {
             nombre,
@@ -28,34 +35,38 @@ export const crearReserva = async (req, res) => {
             canal,
         } = req.body;
 
-        // Assuming there is a Cliente model to associate the reservation with.
-        // For simplicity, we will store the client info directly in the reservation
-        // if the schema had fields for them. Since the current Reserva model does not
-        // include these fields, we will just create the reservation with the fields
-        // that exist. You may need to adjust the model later.
+        const usuarioReserva = req.usuario;
+        if (!usuarioReserva) {
+            return res.status(403).send("No autorizado");
+        }
 
         await Reserva.create({
-            // id_cliente should reference an existing client; here we set a placeholder.
-            id_cliente: 1, // TODO: replace with actual client ID lookup/creation
-            id_mesa: null,
+            id_usuario: usuarioReserva.id,       // El cliente es el mismo usuario
+            id_mesa: null,                       // Se asigna después
             fecha_reserva,
             hora_inicio,
-            hora_fin: null, // will be set by hook if not provided
+            hora_fin: null,                      // El hook la pone a 1.5 horas
             numero_personas,
             estado: "pendiente",
             canal: canal || "web",
             observaciones: observaciones || null,
-            creado_por: req.usuario ? req.usuario.id : 0,
+            creado_por: usuarioReserva.id,       // Quién la creó
         });
-        // After successful creation, redirect to home with a flash/message (simplified)
-        res.redirect("/");
+
+        return res.redirect("/");
     } catch (error) {
         console.error("Error creando reserva:", error);
-        // Render the form again with an error message
-        res.status(500).render("reservas", {
+
+        return res.status(500).render("reservas", {
             title: "Hacer Reserva",
-            error: "No se pudo crear la reserva. Por favor, intente nuevamente.",
+            error: "No se pudo crear la reserva. Por favor inténtelo nuevamente.",
             usuario: req.usuario,
+            csrfToken: req.csrfToken(),
         });
     }
+};
+
+export { 
+    mostrarFormulario, 
+    crearReserva
 };

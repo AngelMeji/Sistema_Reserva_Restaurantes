@@ -147,7 +147,7 @@ const registrar = async (req, res) => {
       nombre: name,
       email,
       password,
-      rol: "recepcionista", // Rol por defecto para nuevos usuarios
+      rol: "cliente", // Rol por defecto para nuevos usuarios
     });
 
     // Autenticar automáticamente después del registro
