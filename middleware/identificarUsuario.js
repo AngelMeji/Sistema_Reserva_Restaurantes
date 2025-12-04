@@ -10,15 +10,17 @@ const protegerRuta = async (req, res, next) => {
 
     // Comprobar el token
     try {
-        const decoded = jwt.verify(_token, process.env.JWT_SECRET);
-        const usuario = await Usuario.scope("eliminarPassword").findByPk(decoded.id);
+        const decoded = jwt.verify(_token, process.env.JWT_SECRETA);
+        const usuario = await Usuario.findByPk(decoded.id);
 
-        // Almacenar el usuario en el req
-        if (usuario) {
-            req.usuario = usuario;
+        // Verificar que el usuario existe, está activo y el token coincide
+        if (usuario && usuario.estado === "activo" && usuario.token === _token) {
+            // Eliminar password antes de asignarlo a req.usuario
+            const { password, ...usuarioSinPassword } = usuario.toJSON();
+            req.usuario = usuarioSinPassword;
             return next();
         } else {
-            return res.redirect("/auth/login");
+            return res.clearCookie("_token").redirect("/auth/login");
         }
     } catch (error) {
         return res.clearCookie("_token").redirect("/auth/login");
@@ -36,20 +38,25 @@ const identificarUsuario = async (req, res, next) => {
 
     // Comprobar el token
     try {
-        const decoded = jwt.verify(_token, process.env.JWT_SECRET);
-        const usuario = await Usuario.scope("eliminarPassword").findByPk(decoded.id);
+        const decoded = jwt.verify(_token, process.env.JWT_SECRETA);
+        const usuario = await Usuario.findByPk(decoded.id);
 
-        // Almacenar el usuario en el req
-        if (usuario) {
-            req.usuario = usuario;
+        // Verificar que el usuario existe, está activo y el token coincide con el de la BD
+        if (usuario && usuario.estado === "activo" && usuario.token === _token) {
+            // Eliminar password antes de asignarlo a req.usuario
+            const { password, ...usuarioSinPassword } = usuario.toJSON();
+            req.usuario = usuarioSinPassword;
         } else {
             req.usuario = null;
+            // Limpiar cookie si el token no es válido
+            res.clearCookie("_token");
         }
 
         return next();
     } catch (error) {
         req.usuario = null;
-        return res.clearCookie("_token").next();
+        res.clearCookie("_token");
+        return next();
     }
 };
 

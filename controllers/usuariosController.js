@@ -65,6 +65,9 @@ const autenticar = async (req, res) => {
   // Autenticar el Usuario
   const token = generarJWT({ id: usuario.id, nombre: usuario.nombre });
 
+  // Guardar el token en la base de datos
+  await usuario.update({ token });
+
   // Almacenar en una Cookie
   return res
     .cookie("_token", token, {
@@ -115,7 +118,8 @@ const registrar = async (req, res) => {
       tituloPagina: "Registro de Usuario",
       errores: resultado.array(),
       csrfToken: req.csrfToken(),
-      usuario: {
+      usuario: req.usuario,
+      datosFormulario: {
         nombre: req.body.name,
         email: req.body.email,
       },
@@ -134,7 +138,8 @@ const registrar = async (req, res) => {
       tituloPagina: "Registro de Usuario",
       csrfToken: req.csrfToken(),
       errores: [{ msg: "El correo electrónico ya está registrado" }],
-      usuario: {
+      usuario: req.usuario,
+      datosFormulario: {
         nombre: req.body.name,
         email: req.body.email,
       },
@@ -153,6 +158,9 @@ const registrar = async (req, res) => {
     // Autenticar automáticamente después del registro
     const token = generarJWT({ id: usuario.id, nombre: usuario.nombre });
 
+    // Guardar el token en la base de datos
+    await usuario.update({ token });
+
     return res
       .cookie("_token", token, {
         httpOnly: true,
@@ -164,7 +172,8 @@ const registrar = async (req, res) => {
       tituloPagina: "Registro de Usuario",
       csrfToken: req.csrfToken(),
       errores: [{ msg: "Error al crear el usuario. Intenta nuevamente" }],
-      usuario: {
+      usuario: req.usuario,
+      datosFormulario: {
         nombre: req.body.name,
         email: req.body.email,
       },
@@ -172,7 +181,11 @@ const registrar = async (req, res) => {
   }
 };
 
-const cerrarSesion = (req, res) => {
+const cerrarSesion = async (req, res) => {
+  // Limpiar el token de la base de datos si hay un usuario autenticado
+  if (req.usuario && req.usuario.id) {
+    await Usuario.update({ token: null }, { where: { id: req.usuario.id } });
+  }
   return res.clearCookie("_token").redirect("/");
 };
 

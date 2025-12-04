@@ -40,6 +40,11 @@ const Usuario = db.define(
             type: DataTypes.ENUM("activo", "inactivo"),
             defaultValue: "activo",
         },
+
+        token: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     },
     {
         hooks: {

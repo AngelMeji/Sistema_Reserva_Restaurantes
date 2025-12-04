@@ -1,6 +1,30 @@
 extends layout/index
 
 block contenido
+    //- Mensaje de éxito de reserva
+    if mensajeExito
+        .fixed.top-24.right-4.z-50.max-w-md(id="successMessage" data-aos="fade-left")
+            .bg-green-100.border-l-4.border-green-500.text-green-700.p-6.rounded-lg.shadow-2xl.relative
+                button.absolute.top-2.right-2.text-green-700.hover_text-green-900(onclick="this.parentElement.parentElement.style.display='none'" type="button")
+                    span.text-2xl &times;
+                .flex.items-start
+                    .flex-shrink-0
+                        span.text-4xl.mr-4
+                    div
+                        p.font-bold.text-lg.mb-1 ¡Reserva Confirmada!
+                        p.text-sm= mensajeExito.texto
+        
+        script.
+            // Auto-cerrar después de 8 segundos
+            setTimeout(function() {
+                const msg = document.getElementById('successMessage');
+                if (msg) {
+                    msg.style.transition = 'opacity 0.5s ease-out';
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.style.display = 'none', 500);
+                }
+            }, 8000);
+
     //- Hero Section
     section.relative.py-20.bg-carbon.text-center.rounded-xl.overflow-hidden.shadow-2xl.mb-16(data-aos="fade-down")
         img.absolute.inset-0.w-full.h-full.object-cover.opacity-70.blur-sm(src="/img/hero_background.png" alt="Restaurante Fondo")
@@ -11,7 +35,7 @@ block contenido
             p.text-xl(class="md:text-2xl").text-crema.font-sans.mb-8(data-aos="fade-up" data-aos-delay="700") Auténtica cocina italiana en un ambiente rústico y moderno.
             a.inline-block.bg-vino.text-dorado.font-bold.py-3.px-8.rounded-full.text-lg(class="hover:bg-opacity-90 transition transform hover:scale-105" href="#menu" data-aos="fade-up" data-aos-delay="900") Ver Menú
 
-    // Info Section
+    //- Info Section
     section.py-16.bg-white.rounded-xl.shadow-lg.mb-16(data-aos="fade-right")
         div.container.mx-auto.px-6.text-center
             h2.text-4xl.font-serif.text-vino.mb-8.font-bold Nuestra Historia

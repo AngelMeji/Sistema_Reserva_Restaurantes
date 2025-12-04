@@ -68,6 +68,12 @@ const Reserva = db.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+
+        dispositivo: {
+            type: DataTypes.ENUM("mobile", "desktop", "tablet"),
+            allowNull: true,
+            defaultValue: "desktop",
+        },
     },
     {
         hooks: {

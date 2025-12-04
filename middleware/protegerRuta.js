@@ -9,18 +9,18 @@ const protegerRuta = async (req, res, next) => {
   }
   // Validar el token
   try {
-    const decoded = jwt.verify(_token, process.env.JWT_SECRET);
-    const usuario = await Usuario.scope("eliminarPassword").findByPk(
-      decoded.id
-    );
-    console.log(usuario);
-    // Almacenar el usuario al REQ
-    if (usuario) {
-      req.usuario = usuario;
+    const decoded = jwt.verify(_token, process.env.JWT_SECRETA);
+    const usuario = await Usuario.findByPk(decoded.id);
+
+    // Verificar que el usuario existe, está activo y el token coincide
+    if (usuario && usuario.estado === "activo" && usuario.token === _token) {
+      // Eliminar password antes de asignarlo a req.usuario
+      const { password, ...usuarioSinPassword } = usuario.toJSON();
+      req.usuario = usuarioSinPassword;
+      return next();
     } else {
-      return res.redirect("/auth/login");
+      return res.clearCookie("_token").redirect("/auth/login");
     }
-    return next();
   } catch (error) {
     return res.clearCookie("_token").redirect("/auth/login");
   }

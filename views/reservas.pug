@@ -5,46 +5,119 @@ block contenido
     +mostrarErrores(errores)
     
     // Reservation Form Section
-    section.py-20.bg-white.rounded-xl.shadow-2xl.my-16(data-aos="fade-up")
-        .container.mx-auto.px-6
-            h2.text-4xl.font-serif.text-vino.mb-6.font-bold Reserva con Nosotros
-            p.text-xl.text-gray-700.leading-relaxed.mb-8.font-sans
-                | Completa el formulario para reservar una mesa en nuestro restaurante. Nos pondremos en contacto para confirmar tu reserva.
-            // Form
-            form(action="/reservas" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6")
-                input(type="hidden" name="_csrf" value=csrfToken)
-                // Nombre
-                .flex.flex-col
-                    label(for="nombre" class="text-lg font-medium text-carbon mb-2") Nombre
-                    input#nombre(type="text" name="nombre" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
-                // Email
-                .flex.flex-col
-                    label(for="email" class="text-lg font-medium text-carbon mb-2") Email
-                    input#email(type="email" name="email" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
-                // Teléfono
-                .flex.flex-col
-                    label(for="telefono" class="text-lg font-medium text-carbon mb-2") Teléfono
-                    input#telefono(type="tel" name="telefono" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
-                // Fecha de reserva
-                .flex.flex-col
-                    label(for="fecha_reserva" class="text-lg font-medium text-carbon mb-2") Fecha
-                    input#fecha_reserva(type="date" name="fecha_reserva" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
-                //- Hora inicio
-                .flex.flex-col
-                    label(for="hora_inicio" class="text-lg font-medium text-carbon mb-2") Hora de inicio
-                    input#hora_inicio(type="time" name="hora_inicio" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
-                // Número de personas
-                .flex.flex-col
-                    label(for="numero_personas" class="text-lg font-medium text-carbon mb-2") Número de personas
-                    input#numero_personas(type="number" name="numero_personas" min="1" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
-                // Canal (oculto, valor "web")
-                input(type="hidden" name="canal" value="web")
-                // Observaciones
-                .flex(class="flex-col md:col-span-2")
-                    label(for="observaciones" class="text-lg font-medium text-carbon mb-2") Observaciones (opcional)
-                    textarea#observaciones(name="observaciones" rows="4" class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-vino")
-                // Submit button
-                .flex(class="justify-center md:col-span-2")
-                    button(type="submit" class="bg-vino text-dorado font-bold py-3 px-8 rounded-full hover:bg-opacity-90 transition transform hover:scale-105")
-                        Hacer Reserva
+    section.py-12.min-h-screen.flex.items-center.justify-center.bg-gray-50
+        .container.mx-auto.px-4.max-w-6xl
+            .relative.w-full(data-aos="fade-up" data-aos-duration="1000")
+                
+                //- Tarjeta Principal con efecto de cristal y sombra profunda
+                div(class="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row" style="min-height: 600px;")
                     
+                    //- Columna Izquierda (Imagen Decorativa)
+                    div(class="hidden lg:block lg:w-5/12 relative overflow-hidden")
+                        //- Imagen de fondo con overlay
+                        div(class="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-110" style="background-image: url('/img/reserva.png');")
+                        div.absolute.inset-0(style="background: linear-gradient(to bottom, rgba(110, 24, 37, 0.7), rgba(60, 68, 48, 0.8));")
+                        
+                        //- Contenido sobre la imagen
+                        div.relative.z-10.h-full.flex.flex-col.justify-center.p-12.text-crema
+                            div.mb-8
+                                img(src="/img/escudo_restaurante.svg" alt="Logo" class="w-24 h-24 mb-6 opacity-90")
+                                h3.text-4xl.font-serif.font-bold.mb-4.text-dorado Experiencia Italiana
+                                div.w-16.h-1.bg-dorado.mb-6
+                                p.font-sans.text-lg.leading-relaxed.opacity-90
+                                    | "La cocina es el corazón de la casa". Permítenos deleitarte con los sabores tradicionales de nuestra tierra en un ambiente inigualable.
+                            
+                            div.mt-auto.space-y-4
+                                .flex.items-center.space-x-4
+                                    div.w-10.h-10.rounded-full.bg-dorado.bg-opacity-20.flex.items-center.justify-center
+                                        span.text-xl 📍
+                                    div
+                                        p.text-xs.uppercase.tracking-widest.text-dorado Ubicación
+                                        p.font-medium Via Roma 123, Ciudad
+
+                    //- Columna Derecha (Formulario)
+                    div(class="w-full lg:w-7/12 bg-crema p-8 lg:p-16 relative")
+                        //- Decoración de fondo sutil
+                        div.absolute.top-0.right-0.w-64.h-64.bg-dorado.opacity-5.rounded-bl-full.pointer-events-none
+                        
+                        div.relative.z-10
+                            h2(class="text-4xl font-serif text-vino mb-2 font-bold") Reserva tu Mesa
+                            p(class="text-carbon opacity-70 mb-10 font-sans") Completa el formulario para asegurar tu velada perfecta.
+
+                            form#reservaForm(action="/reservas" method="POST" class="space-y-8")
+                                input(type="hidden" name="_csrf" value=csrfToken)
+                                input#canal(type="hidden" name="canal" value="web")
+                                input#dispositivo(type="hidden" name="dispositivo" value="desktop")
+                                
+                                //- Grid para inputs compactos
+                                div(class="grid grid-cols-1 md:grid-cols-2 gap-8")
+                                    //- Nombre
+                                    .group.relative
+                                        input#nombre(type="text" name="nombre" placeholder=" " required class="peer w-full bg-transparent border-b-2 border-gray-400 py-3 text-carbon focus:border-vino focus:outline-none transition-colors font-serif text-lg placeholder-transparent")
+                                        label(for="nombre" class="absolute left-0 -top-3.5 text-sm text-vino font-bold transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-vino") Nombre Completo *
+                                    
+                                    //- Email
+                                    .group.relative
+                                        input#email(type="email" name="email" placeholder=" " required class="peer w-full bg-transparent border-b-2 border-gray-400 py-3 text-carbon focus:border-vino focus:outline-none transition-colors font-serif text-lg placeholder-transparent")
+                                        label(for="email" class="absolute left-0 -top-3.5 text-sm text-vino font-bold transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-vino") Correo Electrónico *
+
+                                div(class="grid grid-cols-1 md:grid-cols-2 gap-8")
+                                    //- Teléfono
+                                    .group.relative
+                                        input#telefono(type="tel" name="telefono" placeholder=" " required pattern="[0-9]+" class="peer w-full bg-transparent border-b-2 border-gray-400 py-3 text-carbon focus:border-vino focus:outline-none transition-colors font-serif text-lg placeholder-transparent")
+                                        label(for="telefono" class="absolute left-0 -top-3.5 text-sm text-vino font-bold transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-vino") Teléfono *
+                                    
+                                    //- Número de personas
+                                    .group.relative
+                                        input#numero_personas(type="number" name="numero_personas" min="1" max="20" value="2" placeholder=" " required class="peer w-full bg-transparent border-b-2 border-gray-400 py-3 text-carbon focus:border-vino focus:outline-none transition-colors font-serif text-lg placeholder-transparent")
+                                        label(for="numero_personas" class="absolute left-0 -top-3.5 text-sm text-vino font-bold transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-vino") Personas (1-20) *
+
+                                div(class="grid grid-cols-1 md:grid-cols-2 gap-8")
+                                    //- Fecha
+                                    .group.relative
+                                        label(for="fecha_reserva" class="block text-xs font-bold text-vino uppercase tracking-widest mb-2") Fecha *
+                                        input#fecha_reserva(type="date" name="fecha_reserva" required class="w-full bg-white bg-opacity-50 border border-gray-300 rounded-lg px-4 py-3 text-carbon focus:border-vino focus:ring-1 focus:ring-vino outline-none transition-all font-serif")
+                                    
+                                    //- Hora
+                                    .group.relative
+                                        label(for="hora_inicio" class="block text-xs font-bold text-vino uppercase tracking-widest mb-2") Hora *
+                                        input#hora_inicio(type="time" name="hora_inicio" required class="w-full bg-white bg-opacity-50 border border-gray-300 rounded-lg px-4 py-3 text-carbon focus:border-vino focus:ring-1 focus:ring-vino outline-none transition-all font-serif")
+                                
+                                //- Observaciones
+                                .group.relative
+                                    textarea#observaciones(name="observaciones" rows="3" placeholder=" " class="peer w-full bg-transparent border-b-2 border-gray-400 py-3 text-carbon focus:border-vino focus:outline-none transition-colors font-serif text-lg placeholder-transparent resize-none")
+                                    label(for="observaciones" class="absolute left-0 -top-3.5 text-sm text-vino font-bold transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-vino") Observaciones Especiales (Opcional)
+
+                                //- Botón Submit
+                                .pt-6
+                                    button#submitBtn(type="submit" class="w-full bg-vino text-crema font-bold py-4 px-8 rounded-lg hover:bg-opacity-90 transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center group border border-dorado")
+                                        span.mr-3.tracking-widest CONFIRMAR RESERVA
+                                        span(class="text-xl group-hover:translate-x-2 transition-transform") ⟶
+
+    //- Script para detección de dispositivo y fecha mínima
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detectar tipo de dispositivo
+            function detectDevice() {
+                const userAgent = navigator.userAgent.toLowerCase();
+                const isMobile = /iphone|ipod|android.*mobile|windows phone|blackberry/.test(userAgent);
+                const isTablet = /ipad|android(?!.*mobile)|tablet/.test(userAgent);
+                
+                if (isMobile) return 'mobile';
+                if (isTablet) return 'tablet';
+                return 'desktop';
+            }
+            
+            // Establecer el dispositivo detectado
+            document.getElementById('dispositivo').value = detectDevice();
+            
+            // Establecer fecha mínima como hoy (sin problemas de zona horaria)
+            const fechaInput = document.getElementById('fecha_reserva');
+            const hoy = new Date();
+            const year = hoy.getFullYear();
+            const month = String(hoy.getMonth() + 1).padStart(2, '0');
+            const day = String(hoy.getDate()).padStart(2, '0');
+            const fechaMinima = year + '-' + month + '-' + day;
+            
+            fechaInput.setAttribute('min', fechaMinima);
+        });

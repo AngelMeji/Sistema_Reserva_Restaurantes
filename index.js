@@ -24,7 +24,7 @@ app.use(csurf({ cookie: true }));
 // Conexion a la DB
 try {
   await db.authenticate();
-  db.sync();
+  await db.sync();
   console.log("La conexion es correcta a la DB");
   isDbConnected = true;
 } catch (error) {
@@ -46,13 +46,25 @@ app.use(identificarUsuario);
 app.use("/auth", usuarioRoutes);
 app.use("/reservas", reservasRoutes);
 
-// Routing - Demo route
+// Routing - Página principal
 app.get("/", (req, res) => {
+  // Obtener mensajes de éxito desde query params
+  const { reserva, mensaje } = req.query;
+
+  let mensajeExito = null;
+  if (reserva && mensaje === 'exito') {
+    mensajeExito = {
+      tipo: 'exito',
+      texto: `¡Tu reserva #${reserva} ha sido creada exitosamente! Te contactaremos pronto para confirmar.`
+    };
+  }
+
   res.render("index", {
     title: "Inicio",
     dbStatus: isDbConnected,
     pagina: "Inicio",
-    usuario: req.usuario
+    usuario: req.usuario,
+    mensajeExito
   });
 });
 

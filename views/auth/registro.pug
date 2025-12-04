@@ -6,7 +6,7 @@ block contenido
     +mostrarErrores(errores)
 
     .min-h-screen.flex.items-center.justify-center.py-12.px-4(style="background-color: #F2EAB20F;")
-        .login-container.relative.w-full.max-w-md
+        .login-container.relative.w-full.max-w-md(data-aos="fade-up" data-aos-duration="1000")
             +decoracionesUvas()
             
             //- Marco dorado
@@ -27,10 +27,10 @@ block contenido
                         input(type="hidden" name="_csrf" value=csrfToken)
                         .space-y-4
                             //- Campo Nombre
-                            +campoFormulario("text", "name", "Nombre Completo", usuario ? usuario.nombre : "")
+                            +campoFormulario("text", "name", "Nombre Completo", datosFormulario ? datosFormulario.nombre : "")
                             
                             //- Campo correo
-                            +campoFormulario("email", "email", "Correo Electrónico", usuario ? usuario.email : "")
+                            +campoFormulario("email", "email", "Correo Electrónico", datosFormulario ? datosFormulario.email : "")
                             
                             //- Campo contraseña
                             +campoFormulario("password", "password", "Contraseña")

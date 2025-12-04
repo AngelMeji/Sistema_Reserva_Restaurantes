@@ -7,27 +7,30 @@ const validarReserva = [
 
     body("fecha_reserva")
         .notEmpty().withMessage("La fecha es obligatoria")
+        .isISO8601().withMessage("Formato de fecha inválido")
         .custom((value) => {
+            // Obtener fecha actual en formato YYYY-MM-DD (zona horaria local)
             const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0);
-            const fecha = new Date(value);
-            if (fecha < hoy) throw new Error("La fecha no puede ser anterior a hoy");
-            return true;
-        }),
+            const hoyStr = hoy.getFullYear() + '-' +
+                String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+                String(hoy.getDate()).padStart(2, '0');
 
-    body("hora_inicio")
-        .notEmpty().withMessage("La hora es obligatoria")
-        .custom((value) => {
-            const apertura = "10:00";
-            const cierre = "22:00";
-            if (value < apertura || value > cierre) {
-                throw new Error("La hora debe estar entre 10:00 y 22:00");
+            // Comparar strings directamente para evitar problemas de zona horaria
+            if (value < hoyStr) {
+                throw new Error("La fecha no puede ser anterior a hoy");
             }
             return true;
         }),
 
+    body("hora_inicio")
+        .notEmpty().withMessage("La hora es obligatoria"),
+
     body("numero_personas")
-        .isInt({ min: 1 }).withMessage("Debe haber mínimo 1 persona"),
+        .isInt({ min: 1, max: 20 }).withMessage("El número de personas debe estar entre 1 y 20"),
+
+    body("dispositivo")
+        .optional()
+        .isIn(['mobile', 'desktop', 'tablet']).withMessage("Tipo de dispositivo inválido"),
 ];
 
 export { validarReserva };

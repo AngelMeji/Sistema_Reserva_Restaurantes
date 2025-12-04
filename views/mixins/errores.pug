@@ -1,9 +1,15 @@
 //- Mixin para mostrar errores con estilo vintage
 mixin mostrarErrores(errores)
     if errores
-        .fixed.top-4.left-1_2.transform.-translate-x-1_2.z-50.w-full.max-w-md.px-4(style="left: 50%; transform: translateX(-50%);")
+        style.
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        
+        #errores-container.fixed.top-24.right-4.z-50.w-full.max-w-md.px-4
             each error in errores
-                div(style="background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); border: 2px solid #C7A86C; border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.3); animation: slideDown 0.3s ease-out;")
+                div(style="background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); border: 2px solid #C7A86C; border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.3); animation: slideInRight 0.5s ease-out;")
                     .flex.items-center
                         //- Icono de advertencia
                         svg(width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="min-width: 24px;")
@@ -13,4 +19,19 @@ mixin mostrarErrores(errores)
                         
                         //- Mensaje de error
                         p(style="color: #F2EADF; font-family: 'Lato', sans-serif; font-size: 0.875rem; margin-left: 0.75rem; font-weight: 600;")= error.msg
+
+        script.
+            setTimeout(() => {
+                const container = document.getElementById('errores-container');
+                if (container) {
+                    // Efecto de desvanecimiento
+                    container.style.transition = 'opacity 0.5s ease-out';
+                    container.style.opacity = '0';
+                    
+                    // Eliminar del DOM después de la transición
+                    setTimeout(() => {
+                        container.remove();
+                    }, 500);
+                }
+            }, 6000);
 
