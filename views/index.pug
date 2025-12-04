@@ -1,7 +1,7 @@
 extends layout/index
 
 block contenido
-    // Hero Section
+    //- Hero Section
     section.relative.py-20.bg-carbon.text-center.rounded-xl.overflow-hidden.shadow-2xl.mb-16(data-aos="fade-down")
         img.absolute.inset-0.w-full.h-full.object-cover.opacity-70.blur-sm(src="/img/hero_background.png" alt="Restaurante Fondo")
         div.absolute.inset-0.bg-black.opacity-50
@@ -21,12 +21,12 @@ block contenido
                 | para ofrecerte una experiencia culinaria inolvidable. 
                 | Nuestro espacio combina la calidez de lo rústico con la elegancia moderna.
 
-    // Menu Section
+    //- Menu Section
     section#menu.py-16
         h2.text-4xl.font-serif.text-center.text-carbon.mb-12.font-bold(data-aos="fade-up") Platos Típicos
         
-        div.grid.grid-cols-1.gap-8(class="md:grid-cols-2 lg:grid-cols-3")
-            // Card 1
+        div.grid.grid-cols-1.gap-8     .items-start(class="md:grid-cols-2 lg:grid-cols-3")
+            //- Card 1
             div.bg-white.rounded-lg.shadow-xl.overflow-hidden.transform.transition.duration-300(class="hover:scale-105" data-aos="flip-left" data-aos-delay="100")
                 img.w-full.h-48.object-cover(src="/img/spaghetti_carbonara.png" alt="Spaghetti Carbonara")
                 div.p-6
@@ -36,7 +36,7 @@ block contenido
                     p.text-gray-600.mb-4 Pasta fresca con guanciale crujiente, queso pecorino, huevo y pimienta negra.
                     
 
-            // Card 2
+            //- Card 2
             div.bg-white.rounded-lg.shadow-xl.overflow-hidden.transform.transition.duration-300(class="hover:scale-105" data-aos="flip-left" data-aos-delay="200")
                 img.w-full.h-48.object-cover(src="/img/pizza_margherita.png" alt="Pizza Margherita")
                 div.p-6
@@ -46,7 +46,7 @@ block contenido
                     p.text-gray-600.mb-4 Tomate San Marzano, mozzarella di bufala, albahaca fresca y aceite de oliva.
                     
 
-            // Card 3
+            //- Card 3
             div.bg-white.rounded-lg.shadow-xl.overflow-hidden.transform.transition.duration-300(class="hover:scale-105" data-aos="flip-left" data-aos-delay="300")
                 img.w-full.h-48.object-cover(src="/img/risotto_funghi.png" alt="Risotto ai Funghi")
                 div.p-6
@@ -56,7 +56,7 @@ block contenido
                     p.text-gray-600.mb-4 Arroz arborio cremoso con una selección de setas silvestres y parmesano.
                    
 
-            // Card 4
+            //- Card 4
             div.bg-white.rounded-lg.shadow-xl.overflow-hidden.transform.transition.duration-300(class="hover:scale-105" data-aos="flip-left" data-aos-delay="400")
                 img.w-full.h-48.object-cover(src="/img/lasagna_bolognese.png" alt="Lasagna Bolognese")
                 div.p-6
@@ -66,7 +66,7 @@ block contenido
                     p.text-gray-600.mb-4 Capas de pasta, ragú de carne, bechamel y queso gratinado al horno.
                    
 
-            // Card 5
+            //- Card 5
             div.bg-white.rounded-lg.shadow-xl.overflow-hidden.transform.transition.duration-300(class="hover:scale-105" data-aos="flip-left" data-aos-delay="500")
                 img.w-full.h-48.object-cover(src="/img/tiramisu.png" alt="Tiramisu")
                 div.p-6
@@ -76,7 +76,7 @@ block contenido
                     p.text-gray-600.mb-4 Clásico postre italiano con bizcochos, café espresso y crema de mascarpone.
                     
 
-            // Card 6
+            //- Card 6
             div.bg-white.rounded-lg.shadow-xl.overflow-hidden.transform.transition.duration-300(class="hover:scale-105" data-aos="flip-left" data-aos-delay="600")
                 img.w-full.h-48.object-cover(src="/img/gelato.png" alt="Gelato")
                 div.p-6
@@ -86,7 +86,7 @@ block contenido
                     p.text-gray-600.mb-4 Helado artesanal italiano, disponible en varios sabores tradicionales.
                     
 
-    // Reservation Section
+    //- Reservation Section
     section.py-20.bg-white.rounded-xl.shadow-2xl.my-16(data-aos="fade-up")
         div.container.mx-auto.px-6
             div.flex.flex-col.items-center(class="lg:flex-row lg:gap-12")

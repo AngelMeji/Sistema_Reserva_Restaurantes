@@ -6,8 +6,8 @@ import ConfiguracionRestaurante from "./ConfiguracionRestaurante.js";
 import HorarioAtencion from "./HorarioAtencion.js";
 
 // Cliente -> Reservas
-Reserva.belongsTo(Cliente, { foreignKey: "id_cliente" });
-Cliente.hasMany(Reserva, { foreignKey: "id_cliente" });
+Reserva.belongsTo(Usuario, { foreignKey: "id_usuario" });
+Usuario.hasMany(Reserva, { foreignKey: "id_usuario" });
 
 // Mesa -> Reservas (opcional)
 Reserva.belongsTo(Mesa, { foreignKey: "id_mesa" });
