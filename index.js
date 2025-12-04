@@ -3,6 +3,7 @@ import csurf from "csurf";
 import cookieParser from "cookie-parser";
 import usuarioRoutes from "./routes/usuariosRoutes.js";
 import db from "./config/db.js";
+import reservasRoutes from "./routes/reservasRoutes.js";
 import { identificarUsuario } from "./middleware/identificarUsuario.js";
 
 // Variable to track DB connection status
@@ -43,6 +44,7 @@ app.use(identificarUsuario);
 
 // Routing
 app.use("/auth", usuarioRoutes);
+app.use("/reservas", reservasRoutes);
 
 // Routing - Demo route
 app.get("/", (req, res) => {
