@@ -8,10 +8,12 @@ html(lang="es")
         link(rel="stylesheet", href="/css/style.css")
         link(href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet")
     body.min-h-screen.bg-crema.text-carbon.font-sans
-        nav.bg-vino.p-4.shadow-lg
+        nav.bg-vino.p-4.shadow-lg.relative.z-50
             .container.mx-auto.flex.justify-between.items-center
                 a.text-2xl.text-dorado.font-serif.font-bold(href="/") Ristorante Tradizionale
-                div.flex.items-center.gap-4
+                
+                //- Desktop Menu
+                div(class="hidden lg:flex items-center gap-4")
                     a.bg-dorado.text-vino.px-4.py-2.rounded.font-bold.hover_bg-opacity-90.transition-colors(href="/reservas") Pedir Reserva
                     if usuario
                         //- Usuario autenticado
@@ -23,9 +25,35 @@ html(lang="es")
                         a.text-crema.mr-4.font-bold.hover_text-dorado.transition-colors(href="/auth/login") Iniciar Sesión
                         a.text-crema.font-bold.hover_text-dorado.transition-colors(href="/auth/registro") Registrarse
 
+                //- Hamburger Button
+                button#menu-btn(class="hamburger block lg:hidden focus:outline-none" type="button")
+                    span
+                    span
+                    span
+
+            //- Mobile Menu
+            div#mobile-menu(class="hidden absolute top-full left-0 w-full bg-vino shadow-lg flex-col items-center py-8 space-y-6 lg:hidden z-40")
+                a.bg-dorado.text-vino.px-4.py-2.rounded.font-bold.hover_bg-opacity-90.transition-colors.w-3_4.text-center(href="/reservas") Pedir Reserva
+                if usuario
+                    span.text-crema.font-bold.text-xl Bienvenido, #{usuario.nombre}
+                    a.bg-dorado.text-vino.px-4.py-2.rounded.font-bold.hover_bg-opacity-90.transition-colors.w-3_4.text-center(href="/auth/cerrar-sesion") Cerrar Sesión
+                else
+                    a.text-crema.font-bold.hover_text-dorado.transition-colors.text-xl(href="/auth/login") Iniciar Sesión
+                    a.text-crema.font-bold.hover_text-dorado.transition-colors.text-xl(href="/auth/registro") Registrarse
+
         main(class="mx-auto container mt-10 px-2")
             block contenido
         
         script(src="https://unpkg.com/aos@2.3.1/dist/aos.js")
         script.
             AOS.init();
+            
+            const btn = document.getElementById('menu-btn');
+            const nav = document.getElementById('mobile-menu');
+
+            if(btn && nav) {
+                btn.addEventListener('click', () => {
+                    btn.classList.toggle('open');
+                    nav.classList.toggle('hidden');
+                });
+            }

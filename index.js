@@ -71,6 +71,28 @@ app.get("/", (req, res) => {
 // Definir el puerto
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log("El servidor esta corriendo en el puerto: " + port);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`El servidor esta corriendo en el puerto: ${port}`);
+
+  // Mostrar IP local para acceso desde otros dispositivos
+  import('os').then(os => {
+    const networkInterfaces = os.networkInterfaces();
+    const ips = [];
+
+    Object.keys(networkInterfaces).forEach((interfaceName) => {
+      networkInterfaces[interfaceName].forEach((iface) => {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          ips.push(iface.address);
+        }
+      });
+    });
+
+    if (ips.length > 0) {
+      console.log('\nPara probar en tu teléfono, usa una de estas direcciones:');
+      ips.forEach(ip => {
+        console.log(`http://${ip}:${port}`);
+      });
+      console.log('\nAsegúrate de que tu teléfono y computadora estén en la misma red WiFi.');
+    }
+  });
 });
