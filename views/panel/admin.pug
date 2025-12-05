@@ -1,0 +1,48 @@
+extends ../layout/index
+include ../mixins/errores
+
+block contenido
+    section.py-12.bg-white.rounded-xl.shadow-2xl.my-16(data-aos="fade-up")
+        .container.mx-auto.px-6
+
+            h1.text-4xl.font-serif.text-vino.mb-6.font-bold Panel de Control
+            p.text-lg.text-gray-700.mb-10 Bienvenido, #{usuario.nombre}
+
+            // Tarjetas estilo vintage
+            .grid(class="grid-cols-1 md:grid-cols-3 gap-6")
+
+                // Reservas totales
+                .p-6.rounded-lg.shadow-xl(style="background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); border: 2px solid #C7A86C;")
+                    h2.text-2xl.text-dorado.font-semibold Reservas Totales
+                    p.text-4xl.text-white.mt-3 #{totalReservas}
+
+                // Reservas de hoy
+                .p-6.rounded-lg.shadow-xl(style="background: linear-gradient(135deg, #8B2030 0%, #6E1825 100%); border: 2px solid #C7A86C;")
+                    h2.text-2xl.text-dorado.font-semibold Reservas Hoy
+                    p.text-4xl.text-white.mt-3 #{reservasHoy}
+
+                // Usuarios (solo admin)
+                if usuario.rol === "admin"
+                    .p-6.rounded-lg.shadow-xl(style="background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); border: 2px solid #C7A86C;")
+                        h2.text-2xl.text-dorado.font-semibold Usuarios Registrados
+                        p.text-4xl.text-white.mt-3 #{totalUsuarios}
+
+            // Menú de accesos (según rol)
+            h2.text-3xl.font-serif.text-vino.mt-12.mb-4 Accesos Rápidos
+
+            .grid(class="grid-cols-1 md:grid-cols-2 gap-6")
+
+                a(href="/reservas", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
+                    style="background: #C7A86C; color:#6E1825; font-weight:bold;") Gestionar Reservas
+
+                if usuario.rol === "admin"
+                    a(href="/admin/usuarios", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
+                        style="background: #6E1825; color:#F2EADF; font-weight:bold;") Usuarios del Sistema
+
+                if usuario.rol !== "mesero"
+                    a(href="/mesas", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
+                        style="background: #8B2030; color:#F2EADF; font-weight:bold;") Gestión de Mesas
+
+                if usuario.rol === "admin"
+                    a(href="/configuracion", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
+                        style="background: #C7A86C; color:#6E1825; font-weight:bold;") Configuración General

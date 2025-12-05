@@ -1,9 +1,10 @@
 import express from "express";
 import csurf from "csurf";
 import cookieParser from "cookie-parser";
-import usuarioRoutes from "./routes/usuariosRoutes.js";
 import db from "./config/db.js";
+import usuarioRoutes from "./routes/usuariosRoutes.js";
 import reservasRoutes from "./routes/reservasRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import { identificarUsuario } from "./middleware/identificarUsuario.js";
 
 // Variable to track DB connection status
@@ -45,6 +46,7 @@ app.use(identificarUsuario);
 // Routing
 app.use("/auth", usuarioRoutes);
 app.use("/reservas", reservasRoutes);
+app.use("/", adminRoutes);
 
 // Routing - Página principal
 app.get("/", (req, res) => {
