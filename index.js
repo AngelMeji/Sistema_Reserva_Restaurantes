@@ -1,6 +1,8 @@
 import express from "express";
 import csurf from "csurf";
 import cookieParser from "cookie-parser";
+import session from "express-session";
+import flash from "connect-flash";
 import db from "./config/db.js";
 import usuarioRoutes from "./routes/usuariosRoutes.js";
 import reservasRoutes from "./routes/reservasRoutes.js";
@@ -18,6 +20,28 @@ app.use(express.urlencoded({ extended: true }));
 
 // Habilitar el Cookie Parser
 app.use(cookieParser());
+
+// Configurar sesiones
+app.use(session({
+  secret: process.env.SECRET_KEY || 'mi_secreto_super_seguro',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 // 24 horas
+  }
+}));
+
+// Habilitar flash messages
+app.use(flash());
+
+// Middleware para pasar mensajes flash a las vistas
+app.use((req, res, next) => {
+  res.locals.mensajes = {
+    error: req.flash('error'),
+    exito: req.flash('exito')
+  };
+  next();
+});
 
 // Habiliar el CSRF
 app.use(csurf({ cookie: true }));

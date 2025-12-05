@@ -1,48 +1,336 @@
-extends ../layout/index
+extends ../layout/admin
 include ../mixins/errores
 
 block contenido
-    section.py-12.bg-white.rounded-xl.shadow-2xl.my-16(data-aos="fade-up")
-        .container.mx-auto.px-6
-
-            h1.text-4xl.font-serif.text-vino.mb-6.font-bold Panel de Control
-            p.text-lg.text-gray-700.mb-10 Bienvenido, #{usuario.nombre}
-
-            // Tarjetas estilo vintage
-            .grid(class="grid-cols-1 md:grid-cols-3 gap-6")
-
-                // Reservas totales
-                .p-6.rounded-lg.shadow-xl(style="background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); border: 2px solid #C7A86C;")
-                    h2.text-2xl.text-dorado.font-semibold Reservas Totales
-                    p.text-4xl.text-white.mt-3 #{totalReservas}
-
-                // Reservas de hoy
-                .p-6.rounded-lg.shadow-xl(style="background: linear-gradient(135deg, #8B2030 0%, #6E1825 100%); border: 2px solid #C7A86C;")
-                    h2.text-2xl.text-dorado.font-semibold Reservas Hoy
-                    p.text-4xl.text-white.mt-3 #{reservasHoy}
-
-                // Usuarios (solo admin)
-                if usuario.rol === "admin"
-                    .p-6.rounded-lg.shadow-xl(style="background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); border: 2px solid #C7A86C;")
-                        h2.text-2xl.text-dorado.font-semibold Usuarios Registrados
-                        p.text-4xl.text-white.mt-3 #{totalUsuarios}
-
-            // Menú de accesos (según rol)
-            h2.text-3xl.font-serif.text-vino.mt-12.mb-4 Accesos Rápidos
-
-            .grid(class="grid-cols-1 md:grid-cols-2 gap-6")
-
-                a(href="/reservas", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
-                    style="background: #C7A86C; color:#6E1825; font-weight:bold;") Gestionar Reservas
-
-                if usuario.rol === "admin"
-                    a(href="/admin/usuarios", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
-                        style="background: #6E1825; color:#F2EADF; font-weight:bold;") Usuarios del Sistema
-
+    .admin-panel-container.flex.min-h-screen.bg-crema
+        
+        //- Botón hamburguesa para móviles
+        button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
+            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
+        
+        //- Sidebar izquierdo
+        aside#sidebar.admin-sidebar.bg-vino.text-crema.flex.flex-col.shadow-2xl
+            // Logo y título
+            .sidebar-header.p-6.border-b-2.border-dorado
+                h2.text-2xl.font-serif.font-bold.text-dorado Panel de Control
+                p.text-sm.mt-2.opacity-90 #{usuario.nombre}
+                p.text-xs.opacity-70.capitalize #{usuario.rol}
+            
+            //- Navegación
+            nav.sidebar-nav.flex-1.p-4.space-y-2
+                // Dashboard
+                a.nav-item.active(href="/panel/admin")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
+                    span Dashboard
+                
+                //- Reservas
+                a.nav-item(href="/reservas")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                    span Gestionar Reservas
+                
+                //- Mesas (no para meseros)
                 if usuario.rol !== "mesero"
-                    a(href="/mesas", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
-                        style="background: #8B2030; color:#F2EADF; font-weight:bold;") Gestión de Mesas
-
+                    a.nav-item(href="/mesas")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z")
+                        span Gestión de Mesas
+                
+                //- Usuarios (solo admin)
                 if usuario.rol === "admin"
-                    a(href="/configuracion", class="block p-6 rounded-lg shadow-xl hover:scale-105 transition", 
-                        style="background: #C7A86C; color:#6E1825; font-weight:bold;") Configuración General
+                    a.nav-item(href="/admin/usuarios")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
+                        span Usuarios del Sistema
+                
+                //- Configuración (solo admin)
+                if usuario.rol === "admin"
+                    a.nav-item(href="/configuracion")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                        span Configuración
+            
+            //- Footer del sidebar
+            .sidebar-footer.p-4.border-t-2.border-dorado
+                a.nav-item.logout(href="/auth/cerrar-sesion")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")
+                    span Cerrar Sesión
+        
+        //- Contenido principal
+        main.admin-content.flex-1.p-8
+            //- Encabezado
+            .mb-8
+                h1.text-4xl.font-serif.text-vino.font-bold.mb-2 Dashboard
+                p.text-lg.text-gray-700 Bienvenido de nuevo, #{usuario.nombre}
+            
+            //- Tarjetas de estadísticas
+            .stats-grid.grid(class="grid-cols-1 md:grid-cols-3 gap-6 mb-8")
+                
+                //- Reservas totales
+                .stat-card.bg-white.rounded-xl.shadow-xl.p-6.border-l-4.border-vino(data-aos="fade-up" data-aos-delay="0")
+                    .flex.items-center.justify-between
+                        div
+                            p.text-sm.text-gray-600.font-semibold.uppercase.mb-1 Reservas Totales
+                            p.text-4xl.font-bold.text-vino #{totalReservas}
+                        .stat-icon.bg-vino
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2")
+                
+                //- Reservas de hoy
+                .stat-card.bg-white.rounded-xl.shadow-xl.p-6.border-l-4.border-dorado(data-aos="fade-up" data-aos-delay="100")
+                    .flex.items-center.justify-between
+                        div
+                            p.text-sm.text-gray-600.font-semibold.uppercase.mb-1 Reservas Hoy
+                            p.text-4xl.font-bold.text-dorado #{reservasHoy}
+                        .stat-icon.bg-dorado
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                
+                //- Usuarios (solo admin)
+                if usuario.rol === "admin"
+                    .stat-card.bg-white.rounded-xl.shadow-xl.p-6.border-l-4.border-carbon(data-aos="fade-up" data-aos-delay="200")
+                        .flex.items-center.justify-between
+                            div
+                                p.text-sm.text-gray-600.font-semibold.uppercase.mb-1 Usuarios Registrados
+                                p.text-4xl.font-bold.text-carbon #{totalUsuarios}
+                            .stat-icon.bg-carbon
+                                svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
+            
+            //- Accesos rápidos
+            .quick-access.bg-white.rounded-xl.shadow-xl.p-8(data-aos="fade-up" data-aos-delay="300")
+                h2.text-2xl.font-serif.text-vino.font-bold.mb-6 Accesos Rápidos
+                
+                .grid(class="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4")
+                    
+                    a.quick-link.bg-gradient-vino(href="/reservas")
+                        svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                        span Ver Reservas
+                    
+                    if usuario.rol !== "mesero"
+                        a.quick-link.bg-gradient-dorado(href="/mesas")
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z")
+                            span Gestionar Mesas
+                    
+                    if usuario.rol === "admin"
+                        a.quick-link.bg-gradient-carbon(href="/admin/usuarios")
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
+                            span Usuarios
+                    
+                    if usuario.rol === "admin"
+                        a.quick-link.bg-gradient-oliva(href="/configuracion")
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                            span Configuración
+
+    style.
+        /* Contenedor principal del panel */
+        .admin-panel-container {
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .admin-sidebar {
+            width: 280px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        
+        .sidebar-header {
+            background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%);
+        }
+        
+        /* Items de navegación */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            border-radius: 0.5rem;
+            color: #F2EADF;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover {
+            background: rgba(199, 168, 108, 0.15);
+            transform: translateX(4px);
+            color: #C7A86C;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%);
+            border-left: 3px solid #C7A86C;
+            color: #C7A86C;
+        }
+        
+        .nav-item.logout:hover {
+            background: rgba(220, 38, 38, 0.15);
+            color: #fca5a5;
+        }
+        
+        .nav-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        /* Contenido principal */
+        .admin-content {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+        
+        /* Tarjetas de estadísticas */
+        .stat-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.02) 100%);
+            border-radius: 0 0 0 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .stat-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+        }
+        
+        .stat-icon svg {
+            width: 100%;
+            height: 100%;
+            color: white;
+        }
+        
+        /* Enlaces rápidos */
+        .quick-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 2rem 1.5rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .quick-link svg {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        .quick-link:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+        
+        .bg-gradient-vino {
+            background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%);
+        }
+        
+        .bg-gradient-dorado {
+            background: linear-gradient(135deg, #C7A86C 0%, #D4B87A 100%);
+        }
+        
+        .bg-gradient-carbon {
+            background: linear-gradient(135deg, #3C4430 0%, #4A5238 100%);
+        }
+        
+        .bg-gradient-oliva {
+            background: linear-gradient(135deg, #7D8C5A 0%, #8B9A68 100%);
+        }
+        
+        /* Botón hamburguesa */
+        .sidebar-toggle {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 150;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .sidebar-toggle {
+                display: none;
+            }
+        }
+    
+    script.
+        // Toggle sidebar en móviles
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+            
+            // Cerrar sidebar al hacer click fuera de él
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            });
+        }

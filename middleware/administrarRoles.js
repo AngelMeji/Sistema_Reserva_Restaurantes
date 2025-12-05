@@ -5,12 +5,9 @@ const rol = (...rolesPermitidos) => {
         }
 
         if (!rolesPermitidos.includes(req.usuario.rol)) {
-            return res.status(403).render("403", {
-                title: "Acceso Denegado",
-                csrfToken: req.csrfToken(),
-                usuario: req.usuario,
-                mensaje: "No tienes permisos para acceder a esta sección."
-            });
+            // Redirigir a la página de inicio con mensaje de error
+            req.flash('error', 'No tienes permisos para acceder a esta sección.');
+            return res.redirect("/");
         }
 
         next();

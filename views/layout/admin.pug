@@ -1,0 +1,46 @@
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Panel de Control | Ristorante Traditionale
+        link(href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet")
+        link(rel="stylesheet", href="/css/style.css")
+        link(href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet")
+    body.min-h-screen.bg-crema.text-carbon.font-sans
+        
+        //- Mensajes Flash
+        if mensajes
+            if mensajes.error && mensajes.error.length > 0
+                .flash-messages.fixed.top-4.right-4.z-50(style="max-width: 350px;")
+                    each error in mensajes.error
+                        .flash-message.flash-error.bg-white.border-l-4.border-vino.p-3.rounded.shadow-lg.mb-2(data-aos="fade-left")
+                            .flex.items-center.gap-2
+                                svg.w-5.h-5.text-vino(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+                                span.text-vino.font-medium.text-sm= error
+            
+            if mensajes.exito && mensajes.exito.length > 0
+                .flash-messages.fixed.top-4.right-4.z-50(style="max-width: 350px;")
+                    each exito in mensajes.exito
+                        .flash-message.flash-success.bg-white.border-l-4.border-green-500.p-3.rounded.shadow-lg.mb-2(data-aos="fade-left")
+                            .flex.items-center.gap-2
+                                svg.w-5.h-5.text-green-700(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z")
+                                span.text-green-700.font-medium.text-sm= exito
+
+        block contenido
+        
+        script(src="https://unpkg.com/aos@2.3.1/dist/aos.js")
+        script.
+            AOS.init();
+            
+            // Auto-hide flash messages after 5 seconds
+            setTimeout(() => {
+                const flashMessages = document.querySelectorAll('.flash-message');
+                flashMessages.forEach(msg => {
+                    msg.style.transition = 'opacity 0.5s ease';
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.remove(), 500);
+                });
+            }, 5000);

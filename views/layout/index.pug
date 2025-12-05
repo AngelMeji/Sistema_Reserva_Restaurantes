@@ -41,6 +41,26 @@ html(lang="es")
                     a.text-crema.font-bold.hover_text-dorado.transition-colors.text-xl(href="/auth/login") Iniciar Sesión
                     a.text-crema.font-bold.hover_text-dorado.transition-colors.text-xl(href="/auth/registro") Registrarse
 
+        //- Mensajes Flash
+        if mensajes
+            if mensajes.error && mensajes.error.length > 0
+                .flash-messages.container.mx-auto.px-2.mt-4
+                    each error in mensajes.error
+                        .flash-message.flash-error.bg-white.border-l-4.border-vino.p-3.rounded.shadow-lg.mb-2(data-aos="fade-down")
+                            .flex.items-center.gap-2
+                                svg.w-5.h-5.text-vino(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+                                span.text-vino.font-medium.text-sm= error
+            
+            if mensajes.exito && mensajes.exito.length > 0
+                .flash-messages.container.mx-auto.px-2.mt-4
+                    each exito in mensajes.exito
+                        .flash-message.flash-success.bg-white.border-l-4.border-green-500.p-3.rounded.shadow-lg.mb-2(data-aos="fade-down")
+                            .flex.items-center.gap-2
+                                svg.w-5.h-5.text-green-700(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z")
+                                span.text-green-700.font-medium.text-sm= exito
+
         main(class="mx-auto container mt-10 px-2")
             block contenido
         
@@ -57,3 +77,13 @@ html(lang="es")
                     nav.classList.toggle('hidden');
                 });
             }
+            
+            // Auto-hide flash messages after 5 seconds
+            setTimeout(() => {
+                const flashMessages = document.querySelectorAll('.flash-message');
+                flashMessages.forEach(msg => {
+                    msg.style.transition = 'opacity 0.5s ease';
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.remove(), 500);
+                });
+            }, 5000);
