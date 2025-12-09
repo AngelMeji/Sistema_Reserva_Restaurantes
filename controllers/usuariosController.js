@@ -68,6 +68,11 @@ const autenticar = async (req, res) => {
   // Guardar el token en la base de datos
   await usuario.update({ token });
 
+  // Determinar la URL de redirección según el rol del usuario
+  const redirectUrl = (usuario.rol === "admin" || usuario.rol === "recepcionista")
+    ? "/panel/admin"
+    : "/";
+
   // Almacenar en una Cookie
   return res
     .cookie("_token", token, {
@@ -75,7 +80,7 @@ const autenticar = async (req, res) => {
       // secure: true,
       // sameSite: true
     })
-    .redirect("/");
+    .redirect(redirectUrl);
 };
 
 const formularioRegistro = (req, res) => {
