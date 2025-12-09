@@ -7,6 +7,8 @@ import db from "./config/db.js";
 import usuarioRoutes from "./routes/usuariosRoutes.js";
 import reservasRoutes from "./routes/reservasRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import mesasRoutes from "./routes/mesasRoutes.js";
+import horariosRoutes from "./routes/horariosRoutes.js";
 import { identificarUsuario } from "./middleware/identificarUsuario.js";
 
 // Variable to track DB connection status
@@ -71,6 +73,8 @@ app.use(identificarUsuario);
 app.use("/auth", usuarioRoutes);
 app.use("/reservas", reservasRoutes);
 app.use("/", adminRoutes);
+app.use("/", mesasRoutes);
+app.use("/", horariosRoutes);
 
 // Routing - Página principal
 app.get("/", (req, res) => {

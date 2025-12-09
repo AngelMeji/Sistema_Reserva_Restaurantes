@@ -1,0 +1,52 @@
+extends ../layout/admin
+
+
+block contenido
+    .container
+        if messages.error
+            each m in messages.error
+                .alert.alert-danger= m
+        if messages.exito
+            each m in messages.exito
+                .alert.alert-success= m
+
+        h1 Horarios de Atención
+        form(method="post", action="/config/horarios/crear")
+            input(type="hidden" name="_csrf" value=csrfToken)
+            label Día
+            select(name="dia_semana")
+                option(value="0") Domingo
+                option(value="1") Lunes
+                option(value="2") Martes
+                option(value="3") Miércoles
+                option(value="4") Jueves
+                option(value="5") Viernes
+                option(value="6") Sábado
+            label Hora apertura
+            input(type="time", name="hora_apertura", required)
+            label Hora cierre
+            input(type="time", name="hora_cierre", required)
+            button(type="submit") Agregar
+
+        hr
+        if horarios.length
+            each h in horarios
+                form(method="post", action=`/config/horarios/${h.id_horario}/editar`)
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    .flex.items-center.gap-2.mb-2
+                        span= (["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"])[h.dia_semana]
+                        input(type="time", name="hora_apertura", value=h.hora_apertura)
+                        input(type="time", name="hora_cierre", value=h.hora_cierre)
+                        label
+                            input(type="checkbox", name="activo", checked=h.activo)
+                            | Activo
+                        button(type="submit") Guardar
+                        
+                form(method="post", action=`/config/horarios/${h.id_horario}/eliminar`, style="display:inline")
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    button(type="submit") Eliminar
+        else
+            p No hay horarios configurados
+
+        hr
+        a(href="/config/politicas") Ver / editar políticas

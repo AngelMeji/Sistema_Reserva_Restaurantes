@@ -1,0 +1,24 @@
+extends ../layout/admin
+block contenido
+    .container
+        if messages.error
+            each m in messages.error
+                .alert.alert-danger= m
+        h1 #{mesa ? "Editar Mesa" : "Crear Mesa"}
+        form(method="post", action=action)
+            input(type="hidden" name="_csrf" value=csrfToken)
+            .mb-2
+                label Nombre
+                input(type="text", name="nombre", required, value=(mesa? mesa.nombre : ""))
+            .mb-2
+                label Capacidad
+                input(type="number", name="capacidad", required, min="1", value=(mesa? mesa.capacidad : 4))
+            .mb-2
+                label Zona
+                input(type="text", name="zona", value=(mesa? mesa.zona : ""))
+            .mb-2
+                label Estado
+                select(name="estado")
+                    option(value="activa", selected=(mesa && mesa.estado==="activa")) Activa
+                    option(value="inactiva", selected=(mesa && mesa.estado==="inactiva")) Inactiva
+            button(type="submit") Guardar

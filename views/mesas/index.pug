@@ -1,0 +1,40 @@
+extends ../layout/admin
+
+block contenido
+  .container
+    if messages.error
+      each m in messages.error
+        .alert.alert-danger= m
+    if messages.exito
+      each m in messages.exito
+        .alert.alert-success= m
+    input(type="hidden" name="_csrf" value=csrfToken)
+
+    .flex.justify-between.items-center.mb-4
+      h1.text-2xl Mesas
+      a.btn.btn-primary(href="/mesas/crear") Nueva Mesa
+
+    if mesas.length
+      table.table-auto.w-full
+        thead
+          tr
+            th ID
+            th Nombre
+            th Capacidad
+            th Zona
+            th Estado
+            th Acciones
+        tbody
+          each mesa in mesas
+            tr
+              td= mesa.id
+              td= mesa.nombre
+              td= mesa.capacidad
+              td= mesa.zona
+              td= mesa.estado
+              td
+                a.btn-small(href=`/mesas/${mesa.id}/editar`) Editar
+                form(method="post", action=`/mesas/${mesa.id}/eliminar`, style="display:inline")
+                  button.btn-danger(type="submit") Eliminar
+    else
+      p No hay mesas registradas

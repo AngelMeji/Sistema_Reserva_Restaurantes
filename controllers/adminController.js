@@ -13,6 +13,7 @@ const panelPrincipal = async (req, res) => {
 
         res.render("panel/admin", {
             title: "Panel de Control",
+            csrfToken: req.csrfToken(),
             usuario: req.usuario,
             totalReservas,
             reservasHoy,

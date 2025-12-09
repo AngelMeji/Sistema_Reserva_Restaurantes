@@ -1,5 +1,6 @@
 import express from "express";
 import { panelPrincipal, verReservas, cambiarEstadoReserva, eliminarReserva, verUsuarios, cambiarRolUsuario } from "../controllers/adminController.js";
+import { reporteResumen } from "../controllers/reportesController.js";
 import protegerRuta from "../middleware/protegerRuta.js";
 import rol from "../middleware/administrarRoles.js";
 
@@ -16,5 +17,7 @@ router.post("/admin/reservas/:id/eliminar", protegerRuta, rol("admin", "recepcio
 // Gestión de Usuarios (Solo Admin)
 router.get("/admin/usuarios", protegerRuta, rol("admin"), verUsuarios);
 router.post("/admin/usuarios/:id/rol", protegerRuta, rol("admin"), cambiarRolUsuario);
+
+router.get("/admin/reportes", protegerRuta, rol("admin","recepcionista"), reporteResumen);
 
 export default router;

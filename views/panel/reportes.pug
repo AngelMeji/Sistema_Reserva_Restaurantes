@@ -1,0 +1,53 @@
+extends ../layout/admin
+block contenido
+    .container
+        if messages.error
+            each m in messages.error
+                .alert.alert-danger= m
+
+    h1 Reportes
+
+    h2 Top días (últimos 90 días)
+    input(type="hidden" name="_csrf" value=csrfToken)
+    if topDias.length
+        ul
+            each d in topDias
+                li #{d.get('fecha')} — #{d.get('cantidad')} reservas
+    else
+        p Sin datos
+
+    h2 Reservas (últimos 30 días)
+    if reservasPorDia.length
+        table
+            thead
+                tr
+                    th Fecha
+                    th Cantidad
+            tbody
+                each r in reservasPorDia
+                    tr
+                        td= r.get('fecha')
+                        td= r.get('cantidad')
+    else
+        p Sin actividad
+
+    h2 No-shows (últimos 120 días)
+    p #{noShows}
+
+    h2 Ocupación por mesa (últimos 30 días)
+    if ocupacionMesas.length
+        table
+            thead
+                tr
+                    th Mesa
+                    th Capacidad
+                    th Reservas
+            tbody
+                each o in ocupacionMesas
+                    - const mesa = o.Mesa || {}
+                    tr
+                        td= mesa.nombre || "Sin mesa asignada"
+                        td= mesa.capacidad || "-"
+                        td= o.get('reservas')
+    else
+        p Sin datos
