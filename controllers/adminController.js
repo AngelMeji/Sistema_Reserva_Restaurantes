@@ -1,5 +1,6 @@
 import Reserva from "../models/Reservas.js";
 import Usuario from "../models/Usuarios.js";
+import Mesa from "../models/Mesas.js";
 
 const panelPrincipal = async (req, res) => {
     try {
@@ -28,7 +29,8 @@ const verReservas = async (req, res) => {
     try {
         const reservas = await Reserva.findAll({
             include: [
-                { model: Usuario, as: "usuario", attributes: ["nombre", "email", "telefono"] }
+                { model: Usuario, as: "usuario", attributes: ["nombre", "email", "telefono"] },
+                { model: Mesa, attributes: ["id", "nombre", "capacidad", "zona", "estado"] }
             ],
             order: [["fecha_reserva", "DESC"], ["hora_inicio", "ASC"]]
         });

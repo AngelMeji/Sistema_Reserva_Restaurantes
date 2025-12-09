@@ -75,6 +75,7 @@ block contenido
                             tr
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider ID
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Cliente
+                                th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Mesa Asignada
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Fecha y Hora
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Personas
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Estado
@@ -96,6 +97,27 @@ block contenido
                                                             .text-xs.text-gray-400 #{reserva.usuario.telefono}
                                             else
                                                 span.text-xs.text-gray-500 Usuario no encontrado
+                                        
+                                        //- Mesa Asignada (nueva columna)
+                                        td.px-6.py-4.whitespace-nowrap
+                                            if reserva.mesa
+                                                .flex.items-center.gap-2
+                                                    .w-8.h-8.rounded-lg.bg-gradient-to-br.from-vino.to-red-800.flex.items-center.justify-center.shadow-md
+                                                        span.text-white.text-xs.font-bold #{reserva.mesa.id}
+                                                    div
+                                                        .text-sm.font-semibold.text-vino #{reserva.mesa.nombre}
+                                                        .text-xs.text-gray-500
+                                                            if reserva.mesa.zona
+                                                                span.capitalize #{reserva.mesa.zona}
+                                                                span.mx-1 •
+                                                            span Cap: #{reserva.mesa.capacidad}
+                                            else
+                                                .flex.items-center.gap-2
+                                                    .w-8.h-8.rounded-lg.bg-gray-200.flex.items-center.justify-center
+                                                        span.text-gray-400.text-lg ?
+                                                    div
+                                                        .text-sm.font-medium.text-gray-400 Sin asignar
+                                                        .text-xs.text-orange-500 Pendiente
                                         
                                         td.px-6.py-4.whitespace-nowrap
                                             .text-sm.text-gray-900 #{reserva.fecha_reserva}
@@ -128,7 +150,7 @@ block contenido
                                                     | Eliminar
                             else
                                 tr
-                                    td.px-6.py-4.whitespace-nowrap.text-center.text-gray-500(colspan="6") No hay reservas registradas
+                                    td.px-6.py-4.whitespace-nowrap.text-center.text-gray-500(colspan="7") No hay reservas registradas
 
     //- Modal de confirmación
     #modal-eliminar.modal-overlay.hidden

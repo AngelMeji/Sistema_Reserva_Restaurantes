@@ -1,14 +1,29 @@
 import Mesa from "../models/Mesas.js";
 import Reserva from "../models/Reservas.js";
+import { Op } from "sequelize";
 
 const listarMesas = async (req, res) => {
     try {
-        const mesas = await Mesa.findAll({ order: [["id","ASC"]] });
-        res.render("mesas/index", { 
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5; // 5 mesas por página
+        const offset = (page - 1) * limit;
+
+        const { count, rows: mesas } = await Mesa.findAndCountAll({
+            order: [["id", "ASC"]],
+            limit,
+            offset
+        });
+
+        const totalPages = Math.ceil(count / limit);
+
+        res.render("mesas/index", {
             csrfToken: req.csrfToken(),
-            mesas, 
-            usuario: req.usuario, 
-            messages: req.flash() 
+            mesas,
+            usuario: req.usuario,
+            messages: req.flash(),
+            currentPage: page,
+            totalPages,
+            totalMesas: count
         });
 
     } catch (error) {
@@ -18,23 +33,23 @@ const listarMesas = async (req, res) => {
 };
 
 const mostrarCrearMesa = (req, res) => {
-    res.render("mesas/form", { 
+    res.render("mesas/form", {
         csrfToken: req.csrfToken(),
-        mesa: null, 
-        usuario: req.usuario, 
-        action: "/mesas/crear", 
-        messages: req.flash() 
+        mesa: null,
+        usuario: req.usuario,
+        action: "/mesas/crear",
+        messages: req.flash()
     });
 };
 
 const crearMesa = async (req, res) => {
     try {
         const { nombre, capacidad, zona, estado } = req.body;
-        await Mesa.create({ 
-            nombre, 
-            capacidad: Number(capacidad), 
-            zona, 
-            estado: estado || "activa" 
+        await Mesa.create({
+            nombre,
+            capacidad: Number(capacidad),
+            zona,
+            estado: estado || "activa"
         });
 
         req.flash("exito", "Mesa creada correctamente");
@@ -49,15 +64,15 @@ const mostrarEditarMesa = async (req, res) => {
     try {
         const mesa = await Mesa.findByPk(req.params.id);
         if (!mesa) {
-        req.flash("error", "Mesa no encontrada");
-        return res.redirect("/mesas");
+            req.flash("error", "Mesa no encontrada");
+            return res.redirect("/mesas");
         }
-        res.render("mesas/form", { 
+        res.render("mesas/form", {
             csrfToken: req.csrfToken(),
-            mesa, 
-            usuario: req.usuario, 
-            action: `/mesas/${mesa.id}/editar`, 
-            messages: req.flash() 
+            mesa,
+            usuario: req.usuario,
+            action: `/mesas/${mesa.id}/editar`,
+            messages: req.flash()
         });
 
     } catch (error) {
@@ -71,14 +86,14 @@ const editarMesa = async (req, res) => {
         const { nombre, capacidad, zona, estado } = req.body;
         const mesa = await Mesa.findByPk(req.params.id);
         if (!mesa) {
-        req.flash("error", "Mesa no encontrada");
-        return res.redirect("/mesas");
+            req.flash("error", "Mesa no encontrada");
+            return res.redirect("/mesas");
         }
-        await mesa.update({ 
-            nombre, 
-            capacidad: Number(capacidad), 
-            zona, 
-            estado 
+        await mesa.update({
+            nombre,
+            capacidad: Number(capacidad),
+            zona,
+            estado
         });
 
         req.flash("exito", "Mesa actualizada");
@@ -93,22 +108,22 @@ const eliminarMesa = async (req, res) => {
     try {
         const mesa = await Mesa.findByPk(req.params.id);
         if (!mesa) {
-        req.flash("error", "Mesa no encontrada");
-        return res.redirect("/mesas");
+            req.flash("error", "Mesa no encontrada");
+            return res.redirect("/mesas");
         }
 
         // Evitar eliminar si tiene reservas futuras
         const hoy = new Date();
         const reservasFuturas = await Reserva.count({
-        where: {
-            id_mesa: mesa.id,
-            fecha_reserva: { [Op.gte]: hoy.toISOString().split("T")[0] } // DATEONLY compare
-        }
+            where: {
+                id_mesa: mesa.id,
+                fecha_reserva: { [Op.gte]: hoy.toISOString().split("T")[0] } // DATEONLY compare
+            }
         });
 
         if (reservasFuturas > 0) {
-        req.flash("error", "No se puede eliminar: la mesa tiene reservas futuras");
-        return res.redirect("/mesas");
+            req.flash("error", "No se puede eliminar: la mesa tiene reservas futuras");
+            return res.redirect("/mesas");
         }
 
         await mesa.destroy();
@@ -120,7 +135,7 @@ const eliminarMesa = async (req, res) => {
     }
 };
 
-export{
+export {
     listarMesas,
     mostrarCrearMesa,
     crearMesa,

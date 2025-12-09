@@ -1,40 +1,638 @@
 extends ../layout/admin
 
 block contenido
-  .container
-    if messages.error
-      each m in messages.error
-        .alert.alert-danger= m
-    if messages.exito
-      each m in messages.exito
-        .alert.alert-success= m
-    input(type="hidden" name="_csrf" value=csrfToken)
+  .admin-panel-container.flex.min-h-screen.bg-crema
+    
+    //- Botón hamburguesa para móviles
+    button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
+      svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
+        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
+    
+    //- Sidebar izquierdo
+    aside#sidebar.admin-sidebar.bg-vino.text-crema.flex.flex-col.shadow-2xl
+      // Logo y título
+      .sidebar-header.p-6.border-b-2.border-dorado
+        h2.text-2xl.font-serif.font-bold.text-dorado Panel de Control
+        p.text-sm.mt-2.opacity-90 #{usuario.nombre}
+        p.text-xs.opacity-70.capitalize #{usuario.rol}
+      
+      //- Navegación
+      nav.sidebar-nav.flex-1.p-4.space-y-2
+        // Dashboard
+        a.nav-item(href="/panel/admin")
+          svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
+          span Dashboard
+        
+        //- Reservas
+        a.nav-item(href="/admin/reservas")
+          svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+          span Gestionar Reservas
+        
+        //- Mesas (no para meseros)
+        if usuario.rol !== "mesero"
+          a.nav-item.active(href="/mesas")
+            svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z")
+            span Gestión de Mesas
+        
+        //- Usuarios (solo admin)
+        if usuario.rol === "admin"
+          a.nav-item(href="/admin/usuarios")
+            svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
+            span Usuarios del Sistema
+        
+        //- Configuración (solo admin)
+        if usuario.rol === "admin"
+          a.nav-item(href="/configuracion")
+            svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+            span Configuración
+      
+      //- Footer del sidebar
+      .sidebar-footer.p-4.border-t-2.border-dorado
+        a.nav-item.logout(href="/auth/cerrar-sesion")
+          svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")
+          span Cerrar Sesión
+    
+    //- Contenido principal
+    main.admin-content.flex-1.p-8
+      .mesas-container
+        if messages.error
+          each m in messages.error
+            .alert.alert-danger= m
+        if messages.exito
+          each m in messages.exito
+            .alert.alert-success= m
+        
+        input(type="hidden" name="_csrf" value=csrfToken)
 
-    .flex.justify-between.items-center.mb-4
-      h1.text-2xl Mesas
-      a.btn.btn-primary(href="/mesas/crear") Nueva Mesa
+        .mesas-header
+          .mesas-title
+            h1.text-4xl.font-serif.text-vino Gestión de Mesas
+            p.text-gray-600 Vista de plano del restaurante - Página #{currentPage} de #{totalPages}
+          
+          a.btn.btn-primary(href="/mesas/crear")
+            svg.icon-plus(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4")
+            span Nueva Mesa
 
-    if mesas.length
-      table.table-auto.w-full
-        thead
-          tr
-            th ID
-            th Nombre
-            th Capacidad
-            th Zona
-            th Estado
-            th Acciones
-        tbody
-          each mesa in mesas
-            tr
-              td= mesa.id
-              td= mesa.nombre
-              td= mesa.capacidad
-              td= mesa.zona
-              td= mesa.estado
-              td
-                a.btn-small(href=`/mesas/${mesa.id}/editar`) Editar
-                form(method="post", action=`/mesas/${mesa.id}/eliminar`, style="display:inline")
-                  button.btn-danger(type="submit") Eliminar
-    else
-      p No hay mesas registradas
+        .mesas-stats
+          .stat-card
+            .stat-icon.bg-vino
+              svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
+            .stat-info
+              .stat-value= totalMesas
+              .stat-label Total de Mesas
+          
+          .stat-card
+            .stat-icon.bg-dorado
+              svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")
+            .stat-info
+              .stat-value= currentPage
+              .stat-label Página Actual
+
+        if mesas.length
+          .mesas-map
+            each mesa, index in mesas
+              .mesa-card(class=`zona-${mesa.zona || 'general'}` data-mesa-id=mesa.id)
+                .mesa-card-header
+                  .mesa-number= mesa.nombre
+                  .mesa-status(class=mesa.estado === 'activa' ? 'status-active' : 'status-inactive')
+                    span= mesa.estado === 'activa' ? '●' : '○'
+                
+                .mesa-card-body
+                  .mesa-icon
+                    svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                      rect(x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2")
+                      
+                  .mesa-info
+                    .info-item
+                      svg.info-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z")
+                      span.info-text #{mesa.capacidad} personas
+                    
+                    .info-item
+                      svg.info-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z")
+                      span.info-text= mesa.zona || 'General'
+                
+                .mesa-card-actions
+                  a.action-btn.btn-edit(href=`/mesas/${mesa.id}/editar` title="Editar mesa")
+                    svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                      path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z")
+                  
+                  form.action-form(method="post" action=`/mesas/${mesa.id}/eliminar` onsubmit="return confirm('¿Estás seguro de eliminar esta mesa?')")
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    button.action-btn.btn-delete(type="submit" title="Eliminar mesa")
+                      svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16")
+          
+          // Paginación
+          if totalPages > 1
+            .pagination
+              if currentPage > 1
+                a.pagination-btn(href=`/mesas?page=${currentPage - 1}`)
+                  svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
+                  span Anterior
+              
+              .pagination-info
+                - var start = ((currentPage - 1) * 5) + 1
+                - var end = Math.min(currentPage * 5, totalMesas)
+                span Mostrando #{start}-#{end} de #{totalMesas} mesas
+              
+              if currentPage < totalPages
+                a.pagination-btn(href=`/mesas?page=${currentPage + 1}`)
+                  span Siguiente
+                  svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7")
+        
+        else
+          .empty-state
+            .empty-icon
+              svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4")
+            h2.empty-title No hay mesas registradas
+            p.empty-description Comienza creando tu primera mesa para el restaurante
+            a.btn.btn-primary(href="/mesas/crear") Crear Primera Mesa
+
+  style.
+    /* Estilos del Panel Admin */
+    .admin-panel-container { margin: 0; min-height: 100vh; }
+    .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
+    .admin-sidebar.open { transform: translateX(0); }
+    .sidebar-header { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.5rem; color: #F2EADF; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; }
+    .nav-item:hover { background: rgba(199, 168, 108, 0.15); transform: translateX(4px); color: #C7A86C; }
+    .nav-item.active { background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%); border-left: 3px solid #C7A86C; color: #C7A86C; }
+    .nav-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
+    .admin-content { margin-left: 0; min-height: 100vh; }
+    .sidebar-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 150; }
+
+    /* Estilos de Mesas */
+    .mesas-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .mesas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .mesas-title h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    .mesas-title p {
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--color-vino) 0%, #8B2332 100%);
+      color: white;
+      padding: 0.875rem 1.75rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(110, 24, 37, 0.3);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(110, 24, 37, 0.4);
+    }
+
+    .icon-plus {
+      width: 20px;
+      height: 20px;
+    }
+
+    .mesas-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon svg {
+      width: 32px;
+      height: 32px;
+      stroke: white;
+    }
+
+    .stat-info {
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-vino);
+      line-height: 1;
+      font-family: var(--font-serif);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--color-gray-600);
+      margin-top: 0.25rem;
+    }
+
+    .mesas-map {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .mesa-card {
+      background: white;
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      border: 2px solid transparent;
+    }
+
+    .mesa-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--color-vino), var(--color-dorado));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .mesa-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(110, 24, 37, 0.15);
+      border-color: var(--color-dorado);
+    }
+
+    .mesa-card:hover::before {
+      opacity: 1;
+    }
+
+    .zona-interior { border-left: 4px solid #3498db; }
+    .zona-terraza { border-left: 4px solid #27ae60; }
+    .zona-barra { border-left: 4px solid #e74c3c; }
+    .zona-privado { border-left: 4px solid #9b59b6; }
+    .zona-general { border-left: 4px solid var(--color-dorado); }
+
+    .mesa-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .mesa-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-vino);
+      font-family: var(--font-serif);
+    }
+
+    .mesa-status {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .status-active {
+      color: #27ae60;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-inactive {
+      color: var(--color-gray-400);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .mesa-card-body {
+      margin-bottom: 1.25rem;
+    }
+
+    .mesa-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(110, 24, 37, 0.05), rgba(199, 168, 108, 0.05));
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .mesa-card:hover .mesa-icon {
+      background: linear-gradient(135deg, rgba(110, 24, 37, 0.1), rgba(199, 168, 108, 0.1));
+      transform: scale(1.05) rotate(5deg);
+    }
+
+    .mesa-icon svg {
+      width: 50px;
+      height: 50px;
+      stroke: var(--color-vino);
+    }
+
+    .mesa-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem;
+      background: var(--color-gray-50);
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .info-item:hover {
+      background: var(--color-gray-100);
+    }
+
+    .info-icon {
+      width: 20px;
+      height: 20px;
+      stroke: var(--color-vino);
+      flex-shrink: 0;
+    }
+
+    .info-text {
+      font-size: 0.9rem;
+      color: var(--color-gray-700);
+      font-weight: 500;
+    }
+
+    .mesa-card-actions {
+      display: flex;
+      gap: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-gray-200);
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.625rem;
+      border: none;
+      background: var(--color-gray-100);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn-edit {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    .btn-edit:hover {
+      background: #3498db;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .btn-delete {
+      color: #e74c3c;
+    }
+
+    .btn-delete:hover {
+      background: #e74c3c;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .action-form {
+      flex: 1;
+      margin: 0;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-gray-100);
+      color: var(--color-gray-700);
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover {
+      background: var(--color-vino);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .pagination-btn:first-child:hover {
+      transform: translateX(-4px);
+    }
+
+    .pagination-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .pagination-info {
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+      color: var(--color-gray-600);
+      font-size: 0.95rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .empty-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, rgba(110, 24, 37, 0.05), rgba(199, 168, 108, 0.05));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-icon svg {
+      width: 60px;
+      height: 60px;
+      stroke: var(--color-vino);
+    }
+
+    .empty-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-vino);
+      margin-bottom: 0.75rem;
+      font-family: var(--font-serif);
+    }
+
+    .empty-description {
+      font-size: 1.05rem;
+      color: var(--color-gray-600);
+      margin-bottom: 2rem;
+    }
+
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 500;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .alert-danger {
+      background: var(--color-red-100);
+      color: var(--color-red-800);
+      border-left: 4px solid var(--color-red-500);
+    }
+
+    .alert-success {
+      background: var(--color-green-100);
+      color: var(--color-green-800);
+      border-left: 4px solid var(--color-green-500);
+    }
+
+    @media (min-width: 769px) {
+      .admin-sidebar { transform: translateX(0); }
+      .admin-content { margin-left: 280px; }
+      .sidebar-toggle { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .mesas-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .mesas-map {
+        grid-template-columns: 1fr;
+      }
+
+      .pagination {
+        flex-direction: column;
+      }
+
+      .pagination-info {
+        order: -1;
+        margin-bottom: 1rem;
+      }
+    }
+
+  //- Scripts
+  script.
+    // Toggle sidebar en móviles
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) sidebar.classList.remove('open');
+        }
+      });
+    }
+
+  //- Script opcional para interactividad avanzada
+  script(src="/js/mesas-interactivity.js" defer)

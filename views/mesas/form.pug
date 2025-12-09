@@ -1,24 +1,875 @@
 extends ../layout/admin
+
 block contenido
-    .container
+  .admin-panel-container.flex.min-h-screen.bg-crema
+    
+    //- Botón hamburguesa para móviles
+    button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
+      svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
+        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
+    
+    //- Sidebar izquierdo
+    aside#sidebar.admin-sidebar.bg-vino.text-crema.flex.flex-col.shadow-2xl
+      // Logo y título
+      .sidebar-header.p-6.border-b-2.border-dorado
+        h2.text-2xl.font-serif.font-bold.text-dorado Panel de Control
+        p.text-sm.mt-2.opacity-90 #{usuario.nombre}
+        p.text-xs.opacity-70.capitalize #{usuario.rol}
+      
+      //- Navegación
+      nav.sidebar-nav.flex-1.p-4.space-y-2
+        // Dashboard
+        a.nav-item(href="/panel/admin")
+          svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
+          span Dashboard
+        
+        //- Reservas
+        a.nav-item(href="/admin/reservas")
+          svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+          span Gestionar Reservas
+        
+        //- Mesas (no para meseros)
+        if usuario.rol !== "mesero"
+          a.nav-item.active(href="/mesas")
+            svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z")
+            span Gestión de Mesas
+        
+        //- Usuarios (solo admin)
+        if usuario.rol === "admin"
+          a.nav-item(href="/admin/usuarios")
+            svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
+            span Usuarios del Sistema
+        
+        //- Configuración (solo admin)
+        if usuario.rol === "admin"
+          a.nav-item(href="/configuracion")
+            svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+            span Configuración
+      
+      //- Footer del sidebar
+      .sidebar-footer.p-4.border-t-2.border-dorado
+        a.nav-item.logout(href="/auth/cerrar-sesion")
+          svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")
+          span Cerrar Sesión
+    
+    //- Contenido principal
+    main.admin-content.flex-1.p-8
+      .form-container
+        //- Breadcrumb
+        .breadcrumb.mb-6
+          a.breadcrumb-link(href="/mesas")
+            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
+            span Volver a Mesas
+        
+        //- Header
+        .form-header.mb-8
+          .form-title-container
+            .form-icon
+              svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                if mesa
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z")
+                else
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6")
+            div
+              h1.text-4xl.font-serif.text-vino.font-bold.mb-2= mesa ? "Editar Mesa" : "Crear Nueva Mesa"
+              p.text-lg.text-gray-600= mesa ? `Modificando: ${mesa.nombre}` : "Complete los datos para agregar una nueva mesa"
+        
+        //- Mensajes de error
         if messages.error
+          .alerts-container.mb-6
             each m in messages.error
-                .alert.alert-danger= m
-        h1 #{mesa ? "Editar Mesa" : "Crear Mesa"}
-        form(method="post", action=action)
+              .alert.alert-danger
+                svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+                span= m
+        
+        //- Formulario
+        .form-card
+          form.mesa-form(method="post" action=action)
             input(type="hidden" name="_csrf" value=csrfToken)
-            .mb-2
-                label Nombre
-                input(type="text", name="nombre", required, value=(mesa? mesa.nombre : ""))
-            .mb-2
-                label Capacidad
-                input(type="number", name="capacidad", required, min="1", value=(mesa? mesa.capacidad : 4))
-            .mb-2
-                label Zona
-                input(type="text", name="zona", value=(mesa? mesa.zona : ""))
-            .mb-2
-                label Estado
-                select(name="estado")
-                    option(value="activa", selected=(mesa && mesa.estado==="activa")) Activa
-                    option(value="inactiva", selected=(mesa && mesa.estado==="inactiva")) Inactiva
-            button(type="submit") Guardar
+            
+            .form-grid
+              //- Nombre de la Mesa
+              .form-group
+                label.form-label(for="nombre")
+                  svg.label-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z")
+                  span Nombre de la Mesa
+                  span.required *
+                
+                input.form-input#nombre(
+                  type="text"
+                  name="nombre"
+                  placeholder="Ej: Mesa 1, VIP 3, Terraza A"
+                  required
+                  value=(mesa ? mesa.nombre : "")
+                  autocomplete="off"
+                )
+                p.form-hint Identificador único para la mesa
+              
+              //- Capacidad
+              .form-group
+                label.form-label(for="capacidad")
+                  svg.label-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z")
+                  span Capacidad
+                  span.required *
+                
+                .input-with-icon
+                  input.form-input#capacidad(
+                    type="number"
+                    name="capacidad"
+                    min="1"
+                    max="20"
+                    placeholder="4"
+                    required
+                    value=(mesa ? mesa.capacidad : 4)
+                  )
+                  .input-suffix personas
+                
+                p.form-hint Número máximo de comensales
+              
+              //- Zona
+              .form-group
+                label.form-label(for="zona")
+                  svg.label-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z")
+                  span Zona / Ubicación
+                
+                .zone-selector
+                  - var zonas = ['interior', 'terraza', 'barra', 'privado']
+                  - var zonaColors = {interior: '#3498db', terraza: '#27ae60', barra: '#e74c3c', privado: '#9b59b6'}
+                  - var zonaIcons = {interior: '', terraza: '', barra: '', privado: ''}
+                  
+                  each zona in zonas
+                    label.zone-option(class=`zone-${zona}`)
+                      input(
+                        type="radio"
+                        name="zona"
+                        value=zona
+                        checked=(mesa && mesa.zona === zona)
+                      )
+                      .zone-card(style=`border-color: ${zonaColors[zona]}`)
+                        .zone-emoji= zonaIcons[zona]
+                        .zone-name= zona.charAt(0).toUpperCase() + zona.slice(1)
+                        .zone-check
+                          svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor")
+                            path(fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd")
+                
+                p.form-hint Selecciona la ubicación de la mesa en el restaurante
+              
+              //- Estado
+              .form-group
+                label.form-label(for="estado")
+                  svg.label-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z")
+                  span Estado
+                  span.required *
+                
+                .toggle-container
+                  label.toggle-option
+                    input(
+                      type="radio"
+                      name="estado"
+                      value="activa"
+                      checked=(mesa ? mesa.estado === 'activa' : true)
+                    )
+                    .toggle-card.toggle-activa
+                      .toggle-icon
+                        svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor")
+                          path(fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd")
+                      .toggle-info
+                        .toggle-title Activa
+                        .toggle-description Mesa disponible para reservas
+                  
+                  label.toggle-option
+                    input(
+                      type="radio"
+                      name="estado"
+                      value="inactiva"
+                      checked=(mesa && mesa.estado === 'inactiva')
+                    )
+                    .toggle-card.toggle-inactiva
+                      .toggle-icon
+                        svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor")
+                          path(fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd")
+                      .toggle-info
+                        .toggle-title Inactiva
+                        .toggle-description Mesa no disponible temporalmente
+                
+                p.form-hint Define si la mesa está disponible para usar
+            
+            //- Vista Previa
+            .preview-section
+              h3.preview-title
+                svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z")
+                span Vista Previa
+              
+              .preview-card#mesa-preview
+                .preview-header
+                  .preview-name Mesa 1
+                  .preview-status ●
+                .preview-body
+                  .preview-icon
+                    svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                      rect(x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2")
+                  .preview-info
+                    .preview-item
+                      svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z")
+                      span 4 personas
+                    .preview-item
+                      svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z")
+                      span Interior
+            
+            //- Botones de Acción
+            .form-actions
+              a.btn.btn-secondary(href="/mesas")
+                svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+                span Cancelar
+              
+              button.btn.btn-primary(type="submit")
+                svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+                span= mesa ? "Actualizar Mesa" : "Crear Mesa"
+
+  style.
+    /* Estilos del Panel Admin */
+    .admin-panel-container { margin: 0; min-height: 100vh; }
+    .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
+    .admin-sidebar.open { transform: translateX(0); }
+    .sidebar-header { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.5rem; color: #F2EADF; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; }
+    .nav-item:hover { background: rgba(199, 168, 108, 0.15); transform: translateX(4px); color: #C7A86C; }
+    .nav-item.active { background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%); border-left: 3px solid #C7A86C; color: #C7A86C; }
+    .nav-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
+    .admin-content { margin-left: 0; min-height: 100vh; }
+    .sidebar-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 150; }
+
+    /* Contenedor del Formulario */
+    .form-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+    }
+
+    .breadcrumb-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--color-vino);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .breadcrumb-link:hover {
+      background: rgba(110, 24, 37, 0.05);
+      transform: translateX(-4px);
+    }
+
+    .breadcrumb-link svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Header del Formulario */
+    .form-header {
+      text-align: center;
+    }
+
+    .form-title-container {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .form-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--color-vino), #8B2332);
+      border-radius: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(110, 24, 37, 0.25);
+    }
+
+    .form-icon svg {
+      width: 40px;
+      height: 40px;
+      stroke: white;
+    }
+
+    /* Alertas */
+    .alerts-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .alert {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: 0.75rem;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .alert svg {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .alert-danger {
+      background: var(--color-red-100);
+      color: var(--color-red-800);
+      border-left: 4px solid var(--color-red-500);
+    }
+
+    /* Card del Formulario */
+    .form-card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 3rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+
+    /* Grid del Formulario */
+    .form-grid {
+      display: grid;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Grupo de Formulario */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: var(--color-carbon);
+      font-size: 0.95rem;
+    }
+
+    .label-icon {
+      width: 20px;
+      height: 20px;
+      stroke: var(--color-vino);
+    }
+
+    .required {
+      color: var(--color-red-500);
+      font-size: 1.1rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.875rem 1.125rem;
+      border: 2px solid var(--color-gray-300);
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-vino);
+      box-shadow: 0 0 0 3px rgba(110, 24, 37, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .form-input::placeholder {
+      color: var(--color-gray-400);
+    }
+
+    .input-with-icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 1.125rem;
+      color: var(--color-gray-500);
+      font-weight: 600;
+      font-size: 0.875rem;
+      pointer-events: none;
+    }
+
+    .form-hint {
+      font-size: 0.85rem;
+      color: var(--color-gray-500);
+      margin-top: -0.25rem;
+    }
+
+    /* Selector de Zona */
+    .zone-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+
+    .zone-option {
+      cursor: pointer;
+    }
+
+    .zone-option input[type="radio"] {
+      display: none;
+    }
+
+    .zone-card {
+      padding: 1.25rem;
+      border: 2px solid var(--color-gray-300);
+      border-radius: 0.75rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: white;
+      position: relative;
+    }
+
+    .zone-option:hover .zone-card {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .zone-option input[type="radio"]:checked + .zone-card {
+      border-width: 3px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      transform: scale(1.05);
+    }
+
+    .zone-emoji {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .zone-name {
+      font-weight: 600;
+      color: var(--color-carbon);
+      text-transform: capitalize;
+    }
+
+    .zone-check {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .zone-option input[type="radio"]:checked + .zone-card .zone-check {
+      opacity: 1;
+    }
+
+    .zone-check svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+
+    .zone-interior .zone-check { background: #3498db; }
+    .zone-terraza .zone-check { background: #27ae60; }
+    .zone-barra .zone-check { background: #e74c3c; }
+    .zone-privado .zone-check { background: #9b59b6; }
+
+    /* Toggle de Estado */
+    .toggle-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .toggle-option {
+      cursor: pointer;
+    }
+
+    .toggle-option input[type="radio"] {
+      display: none;
+    }
+
+    .toggle-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem;
+      border: 2px solid var(--color-gray-300);
+      border-radius: 0.75rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .toggle-option:hover .toggle-card {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .toggle-option input[type="radio"]:checked + .toggle-card {
+      border-width: 3px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .toggle-activa {
+      border-color: var(--color-green-500);
+    }
+
+    .toggle-option input[type="radio"]:checked + .toggle-activa {
+      background: var(--color-green-100);
+      border-color: var(--color-green-700);
+    }
+
+    .toggle-inactiva {
+      border-color: var(--color-gray-400);
+    }
+
+    .toggle-option input[type="radio"]:checked + .toggle-inactiva {
+      background: var(--color-gray-100);
+      border-color: var(--color-gray-600);
+    }
+
+    .toggle-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-activa .toggle-icon {
+      color: var(--color-green-700);
+    }
+
+    .toggle-inactiva .toggle-icon {
+      color: var(--color-gray-600);
+    }
+
+    .toggle-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .toggle-info {
+      flex: 1;
+    }
+
+    .toggle-title {
+      font-weight: 700;
+      color: var(--color-carbon);
+      margin-bottom: 0.25rem;
+    }
+
+    .toggle-description {
+      font-size: 0.85rem;
+      color: var(--color-gray-600);
+    }
+
+    /* Vista Previa */
+    .preview-section {
+      margin-top: 2.5rem;
+      padding-top: 2.5rem;
+      border-top: 2px dashed var(--color-gray-300);
+    }
+
+    .preview-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-vino);
+      margin-bottom: 1.5rem;
+      font-family: var(--font-serif);
+    }
+
+    .preview-title svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .preview-card {
+      max-width: 350px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      border: 2px solid transparent;
+      border-left: 4px solid var(--color-dorado);
+      transition: all 0.3s ease;
+    }
+
+    .preview-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(110, 24, 37, 0.15);
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .preview-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-vino);
+      font-family: var(--font-serif);
+    }
+
+    .preview-status {
+      font-size: 1.5rem;
+      color: #27ae60;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .preview-body {
+      margin-bottom: 1rem;
+    }
+
+    .preview-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(110, 24, 37, 0.05), rgba(199, 168, 108, 0.05));
+      border-radius: 1rem;
+    }
+
+    .preview-icon svg {
+      width: 50px;
+      height: 50px;
+      stroke: var(--color-vino);
+    }
+
+    .preview-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .preview-item {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem;
+      background: var(--color-gray-50);
+      border-radius: 0.5rem;
+    }
+
+    .preview-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--color-vino);
+      flex-shrink: 0;
+    }
+
+    .preview-item span {
+      font-size: 0.9rem;
+      color: var(--color-gray-700);
+      font-weight: 500;
+    }
+
+    /* Botones de Acción */
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--color-gray-200);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.875rem 2rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn-secondary {
+      background: var(--color-gray-200);
+      color: var(--color-gray-700);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-gray-300);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-vino) 0%, #8B2332 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(110, 24, 37, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(110, 24, 37, 0.4);
+    }
+
+    @media (min-width: 769px) {
+      .admin-sidebar { transform: translateX(0); }
+      .admin-content { margin-left: 280px; }
+      .sidebar-toggle { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .form-card {
+        padding: 1.5rem;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+
+      .zone-selector {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .toggle-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  //- Scripts
+  script.
+    // Toggle sidebar en móviles
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) sidebar.classList.remove('open');
+        }
+      });
+    }
+
+    // Preview en tiempo real
+    const nombreInput = document.getElementById('nombre');
+    const capacidadInput = document.getElementById('capacidad');
+    const zonaInputs = document.querySelectorAll('input[name="zona"]');
+    const estadoInputs = document.querySelectorAll('input[name="estado"]');
+    
+    const previewName = document.querySelector('.preview-name');
+    const previewCapacity = document.querySelector('.preview-item:first-child span');
+    const previewZone = document.querySelector('.preview-item:last-child span');
+    const previewStatus = document.querySelector('.preview-status');
+    const previewCard = document.getElementById('mesa-preview');
+
+    const zonaColors = {
+      interior: '#3498db',
+      terraza: '#27ae60',
+      barra: '#e74c3c',
+      privado: '#9b59b6'
+    };
+
+    function updatePreview() {
+      // Nombre
+      if (nombreInput.value) {
+        previewName.textContent = nombreInput.value;
+      } else {
+        previewName.textContent = 'Mesa 1';
+      }
+
+      // Capacidad
+      if (capacidadInput.value) {
+        previewCapacity.textContent = `${capacidadInput.value} personas`;
+      }
+
+      // Zona
+      const selectedZona = document.querySelector('input[name="zona"]:checked');
+      if (selectedZona) {
+        const zona = selectedZona.value;
+        previewZone.textContent = zona.charAt(0).toUpperCase() + zona.slice(1);
+        previewCard.style.borderLeftColor = zonaColors[zona];
+      } else {
+        previewZone.textContent = 'General';
+        previewCard.style.borderLeftColor = '#C7A86C';
+      }
+
+      // Estado
+      const selectedEstado = document.querySelector('input[name="estado"]:checked');
+      if (selectedEstado) {
+        if (selectedEstado.value === 'activa') {
+          previewStatus.style.color = '#27ae60';
+          previewStatus.style.animation = 'pulse 2s ease-in-out infinite';
+          previewStatus.textContent = '●';
+        } else {
+          previewStatus.style.color = '#9ca3af';
+          previewStatus.style.animation = 'none';
+          previewStatus.textContent = '○';
+        }
+      }
+    }
+
+    // Event listeners
+    if (nombreInput) nombreInput.addEventListener('input', updatePreview);
+    if (capacidadInput) capacidadInput.addEventListener('input', updatePreview);
+    zonaInputs.forEach(input => input.addEventListener('change', updatePreview));
+    estadoInputs.forEach(input => input.addEventListener('change', updatePreview));
+
+    // Inicializar preview
+    updatePreview();
