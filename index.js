@@ -9,6 +9,7 @@ import reservasRoutes from "./routes/reservasRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import mesasRoutes from "./routes/mesasRoutes.js";
 import horariosRoutes from "./routes/horariosRoutes.js";
+import misReservasRoutes from "./routes/misReservasRoutes.js";
 import { identificarUsuario } from "./middleware/identificarUsuario.js";
 
 // Variable to track DB connection status
@@ -72,6 +73,7 @@ app.use(identificarUsuario);
 // Routing
 app.use("/auth", usuarioRoutes);
 app.use("/reservas", reservasRoutes);
+app.use("/mis-reservas", misReservasRoutes);
 app.use("/", adminRoutes);
 app.use("/", mesasRoutes);
 app.use("/", horariosRoutes);

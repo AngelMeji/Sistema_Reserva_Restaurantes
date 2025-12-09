@@ -1,13 +1,59 @@
 import { validationResult } from "express-validator";
-import { Usuario, Reserva, Mesa } from "../models/index.js";
+import { Usuario, Reserva, Mesa, HorarioAtencion, PoliticaReserva } from "../models/index.js";
 import { Op } from "sequelize";
 
-const mostrarFormulario = (req, res) => {
+// Helper para obtener horarios JSON
+const obtenerHorariosJSON = async () => {
+    try {
+        const horarios = await HorarioAtencion.findAll({
+            where: { activo: true },
+            order: [["dia_semana", "ASC"]]
+        });
+        return JSON.stringify(horarios.map(h => ({
+            dia_semana: h.dia_semana,
+            hora_apertura: h.hora_apertura,
+            hora_cierre: h.hora_cierre
+        })));
+    } catch (error) {
+        console.error("Error obteniendo horarios:", error);
+        return "[]";
+    }
+};
+
+// Helper para obtener políticas
+const obtenerPoliticas = async () => {
+    try {
+        let politica = await PoliticaReserva.findOne();
+        if (!politica) {
+            politica = await PoliticaReserva.create({});
+        }
+        return {
+            tiempo_cancelacion_min: politica.tiempo_cancelacion_min,
+            tiempo_anticipacion_horas: politica.tiempo_anticipacion_horas,
+            max_personas_por_reserva: politica.max_personas_por_reserva,
+            duracion_default_min: politica.duracion_default_min
+        };
+    } catch (error) {
+        console.error("Error obteniendo políticas:", error);
+        return {
+            tiempo_cancelacion_min: 60,
+            tiempo_anticipacion_horas: 1,
+            max_personas_por_reserva: 8,
+            duracion_default_min: 90
+        };
+    }
+};
+
+const mostrarFormulario = async (req, res) => {
+    const horarios = await obtenerHorariosJSON();
+    const politicas = await obtenerPoliticas();
     res.render("reservas", {
         title: "Hacer Reserva",
         csrfToken: req.csrfToken(),
         usuario: req.usuario,
         pagina: "Reservas",
+        horarios,
+        politicas: JSON.stringify(politicas)
     });
 };
 
@@ -110,6 +156,10 @@ const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas)
 };
 
 const crearReserva = async (req, res) => {
+    // Obtener horarios y políticas para todos los renders
+    const horarios = await obtenerHorariosJSON();
+    const politicas = JSON.stringify(await obtenerPoliticas());
+
     // Validación
     let resultado = validationResult(req);
 
@@ -121,6 +171,8 @@ const crearReserva = async (req, res) => {
             csrfToken: req.csrfToken(),
             datos: req.body,
             pagina: "Reservas",
+            horarios,
+            politicas
         });
     }
 
@@ -144,6 +196,8 @@ const crearReserva = async (req, res) => {
                 errores: [{ msg: "Debes iniciar sesión para hacer una reserva" }],
                 csrfToken: req.csrfToken(),
                 pagina: "Reservas",
+                horarios,
+                politicas
             });
         }
 
@@ -164,6 +218,8 @@ const crearReserva = async (req, res) => {
                 csrfToken: req.csrfToken(),
                 datos: req.body,
                 pagina: "Reservas",
+                horarios,
+                politicas
             });
         }
 
@@ -204,6 +260,8 @@ const crearReserva = async (req, res) => {
             usuario: req.usuario,
             csrfToken: req.csrfToken(),
             pagina: "Reservas",
+            horarios,
+            politicas
         });
     }
 };
