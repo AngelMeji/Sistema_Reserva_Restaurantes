@@ -1,4 +1,3 @@
-// controllers/horariosController.js
 import HorarioAtencion from "../models/HorarioAtencion.js";
 import PoliticaReserva from "../models/PoliticaReserva.js";
 
@@ -13,7 +12,7 @@ const listarHorarios = async (req, res) => {
           politica = await PoliticaReserva.create({});
         }
 
-        res.render("config/horarios", { 
+        res.render("config/config", { 
           csrfToken: req.csrfToken(),
           horarios, 
           politica, 
@@ -35,7 +34,7 @@ const crearHorario = async (req, res) => {
         
         if (hora_apertura >= hora_cierre) {
         req.flash("error", "Hora de apertura debe ser menor que hora de cierre");
-        return res.redirect("/config/horarios");
+        return res.redirect("/config");
         }
         
         await HorarioAtencion.create({
@@ -46,11 +45,11 @@ const crearHorario = async (req, res) => {
         });
 
         req.flash("exito", "Horario creado");
-        res.redirect("/config/horarios");
+        res.redirect("/config");
 
     } catch (error) {
         req.flash("error", "Error creando horario: " + error.message);
-        res.redirect("/config/horarios");
+        res.redirect("/config");
     }
 };
 
@@ -59,14 +58,14 @@ const editarHorario = async (req, res) => {
     const horario = await HorarioAtencion.findByPk(req.params.id);
     if (!horario) {
       req.flash("error","Horario no encontrado");
-      return res.redirect("/config/horarios");
+      return res.redirect("/config");
     }
 
     const { hora_apertura, hora_cierre, activo } = req.body
 
     if (hora_apertura >= hora_cierre) {
       req.flash("error", "Hora de apertura debe ser menor que hora de cierre");
-      return res.redirect("/config/horarios");
+      return res.redirect("/config");
     }
 
     await horario.update({ 
@@ -76,11 +75,11 @@ const editarHorario = async (req, res) => {
     });
 
     req.flash("exito", "Horario actualizado");
-    res.redirect("/config/horarios");
+    res.redirect("/config");
 
   } catch (error) {
     req.flash("error", "Error editando horario: " + error.message);
-    res.redirect("/config/horarios");
+    res.redirect("/config");
   }
 };
 
@@ -89,16 +88,16 @@ const eliminarHorario = async (req, res) => {
     const horario = await HorarioAtencion.findByPk(req.params.id);
     if (!horario) {
       req.flash("error","Horario no encontrado");
-      return res.redirect("/config/horarios");
+      return res.redirect("/config");
     }
 
     await horario.destroy();
     req.flash("exito","Horario eliminado");
-    res.redirect("/config/horarios");
+    res.redirect("/config");
 
   } catch (error) {
     req.flash("error","Error eliminando horario: " + error.message);
-    res.redirect("/config/horarios");
+    res.redirect("/config");
   }
 };
 

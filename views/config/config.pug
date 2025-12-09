@@ -50,3 +50,16 @@ block contenido
 
         hr
         a(href="/config/politicas") Ver / editar políticas
+
+        h1 Políticas de Reserva
+        form(method="post", action="/config/politicas/actualizar")
+            input(type="hidden" name="_csrf" value=csrfToken)
+            label Tiempo cancelación (minutos)
+            input(type="number", name="tiempo_cancelacion_min", value=politica.tiempo_cancelacion_min)
+            label Tiempo anticipación mínimo (horas)
+            input(type="number", name="tiempo_anticipacion_horas", value=politica.tiempo_anticipacion_horas)
+            label Máx personas por reserva
+            input(type="number", name="max_personas_por_reserva", value=politica.max_personas_por_reserva)
+            label Duración por defecto (min)
+            input(type="number", name="duracion_default_min", value=politica.duracion_default_min)
+            button(type="submit") Guardar políticas
