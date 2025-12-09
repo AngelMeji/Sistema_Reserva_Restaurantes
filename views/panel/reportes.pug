@@ -1,53 +1,390 @@
 extends ../layout/admin
+
 block contenido
-    .container
-        if messages.error
-            each m in messages.error
-                .alert.alert-danger= m
+    .admin-panel-container.flex.min-h-screen.bg-crema
+        
+        //- Botón hamburguesa para móviles
+        button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
+            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
+        
+        //- Sidebar izquierdo
+        aside#sidebar.admin-sidebar.bg-vino.text-crema.flex.flex-col.shadow-2xl
+            // Logo y título
+            .sidebar-header.p-6.border-b-2.border-dorado
+                h2.text-2xl.font-serif.font-bold.text-dorado Panel de Control
+                p.text-sm.mt-2.opacity-90 #{usuario.nombre}
+                p.text-xs.opacity-70.capitalize #{usuario.rol}
+            
+            //- Navegación
+            nav.sidebar-nav.flex-1.p-4.space-y-2
+                // Dashboard
+                a.nav-item(href="/panel/admin")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
+                    span Dashboard
+                
+                //- Reservas
+                a.nav-item(href="/admin/reservas")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                    span Gestionar Reservas
+                
+                //- Mesas
+                if usuario.rol !== "mesero"
+                    a.nav-item(href="/mesas")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z")
+                        span Gestión de Mesas
+                
+                //- Usuarios (solo admin)
+                if usuario.rol === "admin"
+                    a.nav-item(href="/admin/usuarios")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
+                        span Usuarios del Sistema
 
-    h1 Reportes
+                //- Reportes (solo admin)
+                if usuario.rol === "admin"
+                    a.nav-item.active(href="/admin/reportes")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z")
+                        span Reportes
 
-    h2 Top días (últimos 90 días)
-    input(type="hidden" name="_csrf" value=csrfToken)
-    if topDias.length
-        ul
-            each d in topDias
-                li #{d.get('fecha')} — #{d.get('cantidad')} reservas
-    else
-        p Sin datos
+                //- Configuración (solo admin)
+                if usuario.rol === "admin"
+                    a.nav-item(href="/config")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                        span Configuración
+                
+                //- Pagina principal
+                a.nav-item(href="/")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
+                    span Regresar a Inicio
+            
+            //- Footer del sidebar
+            .sidebar-footer.p-4.border-t-2.border-dorado
+                a.nav-item.logout(href="/auth/cerrar-sesion")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")
+                    span Cerrar Sesión
+        
+        //- Contenido principal
+        main.admin-content.flex-1.p-8
+            //- Mensajes
+            if messages.error
+                each m in messages.error
+                    .bg-red-100.border-l-4.border-red-500.text-red-700.p-4.mb-6.rounded-r-lg
+                        p.font-semibold= m
+            if messages.exito
+                each m in messages.exito
+                    .bg-green-100.border-l-4.border-green-500.text-green-700.p-4.mb-6.rounded-r-lg
+                        p.font-semibold= m
 
-    h2 Reservas (últimos 30 días)
-    if reservasPorDia.length
-        table
-            thead
-                tr
-                    th Fecha
-                    th Cantidad
-            tbody
-                each r in reservasPorDia
-                    tr
-                        td= r.get('fecha')
-                        td= r.get('cantidad')
-    else
-        p Sin actividad
+            //- Encabezado
+            .mb-8.flex.justify-between.items-center
+                div
+                    h1.text-4xl.font-serif.text-vino.font-bold.mb-2  Reportes y Estadísticas
+                    p.text-lg.text-gray-700 Análisis completo del rendimiento del restaurante
 
-    h2 No-shows (últimos 120 días)
-    p #{noShows}
+            //- Tarjetas de estadísticas principales
+            .grid(class="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8")
+                //- Total reservas 30 días
+                .stat-card.bg-white.rounded-xl.shadow-xl.p-6.border-l-4.border-vino
+                    .flex.items-center.justify-between
+                        div
+                            p.text-sm.text-gray-600.font-semibold.uppercase.mb-1 Reservas (30 días)
+                            p.text-3xl.font-bold.text-vino #{totalReservas30}
+                        .stat-icon.bg-vino
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                
+                //- Confirmadas
+                .stat-card.bg-white.rounded-xl.shadow-xl.p-6.border-l-4.border-green-500
+                    .flex.items-center.justify-between
+                        div
+                            p.text-sm.text-gray-600.font-semibold.uppercase.mb-1 Confirmadas
+                            p.text-3xl.font-bold.text-green-600 #{reservasConfirmadas}
+                        .stat-icon.bg-green-500
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+                
+                //- No Shows
+                .stat-card.bg-white.rounded-xl.shadow-xl.p-6.border-l-4.border-orange-500
+                    .flex.items-center.justify-between
+                        div
+                            p.text-sm.text-gray-600.font-semibold.uppercase.mb-1 No-Shows (120 días)
+                            p.text-3xl.font-bold.text-orange-600 #{noShows}
+                            p.text-xs.text-gray-500 Tasa: #{tasaNoShow}%
+                        .stat-icon.bg-orange-500
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+                
+                //- Canceladas
+                .stat-card.bg-white.rounded-xl.shadow-xl.p-6.border-l-4.border-red-500
+                    .flex.items-center.justify-between
+                        div
+                            p.text-sm.text-gray-600.font-semibold.uppercase.mb-1 Canceladas (90 días)
+                            p.text-3xl.font-bold.text-red-600 #{reservasCanceladas}
+                        .stat-icon.bg-red-500
+                            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
 
-    h2 Ocupación por mesa (últimos 30 días)
-    if ocupacionMesas.length
-        table
-            thead
-                tr
-                    th Mesa
-                    th Capacidad
-                    th Reservas
-            tbody
-                each o in ocupacionMesas
-                    - const mesa = o.Mesa || {}
-                    tr
-                        td= mesa.nombre || "Sin mesa asignada"
-                        td= mesa.capacidad || "-"
-                        td= o.get('reservas')
-    else
-        p Sin datos
+            //- Segunda fila de métricas
+            .grid(class="grid-cols-1 md:grid-cols-3 gap-6 mb-8")
+                //- Promedio personas
+                .bg-white.rounded-xl.shadow-lg.p-6.text-center
+                    .w-16.h-16.mx-auto.mb-4.rounded-full.bg-gradient-to-br.from-vino.to-red-700.flex.items-center.justify-center
+                        span.text-2xl.text-white 
+                    p.text-sm.text-gray-600.font-semibold.uppercase Promedio Personas/Reserva
+                    p.text-4xl.font-bold.text-vino.mt-2 #{promedioPersonas}
+                
+                //- Total reservas período largo
+                .bg-white.rounded-xl.shadow-lg.p-6.text-center
+                    .w-16.h-16.mx-auto.mb-4.rounded-full.bg-gradient-to-br.from-dorado.to-yellow-600.flex.items-center.justify-center
+                        span.text-2xl.text-white 
+                    p.text-sm.text-gray-600.font-semibold.uppercase Total (120 días)
+                    p.text-4xl.font-bold.text-dorado.mt-2 #{totalReservas120}
+                
+                //- Hora más popular
+                .bg-white.rounded-xl.shadow-lg.p-6.text-center
+                    .w-16.h-16.mx-auto.mb-4.rounded-full.bg-gradient-to-br.from-green-600.to-green-800.flex.items-center.justify-center
+                        span.text-2xl.text-white 
+                    p.text-sm.text-gray-600.font-semibold.uppercase Hora Más Popular
+                    if horasMasPopulares.length
+                        p.text-4xl.font-bold.text-green-700.mt-2 #{horasMasPopulares[0].get('hora')}:00
+                    else
+                        p.text-4xl.font-bold.text-gray-400.mt-2 N/A
+
+            //- Contenido en grid
+            .grid(class="grid-cols-1 lg:grid-cols-2 gap-8 mb-8")
+                
+                //- Días más populares de la semana
+                .bg-white.rounded-xl.shadow-xl.overflow-hidden
+                    .bg-gradient-vino.text-dorado.px-6.py-4
+                        h3.text-xl.font-serif.font-bold  Días Más Populares
+                        p.text-sm.opacity-80 Reservas por día de la semana (90 días)
+                    .p-6
+                        if reservasDiaSemanaFormatted.length
+                            .space-y-4
+                                each item, index in reservasDiaSemanaFormatted
+                                    .flex.items-center.gap-4
+                                        .w-8.h-8.rounded-full.flex.items-center.justify-center.text-white.font-bold.text-sm(class=index === 0 ? "bg-vino" : index === 1 ? "bg-dorado" : "bg-gray-400") #{index + 1}
+                                        .flex-1
+                                            .flex.justify-between.items-center.mb-1
+                                                span.font-semibold.text-gray-800 #{item.dia}
+                                                span.text-sm.font-bold.text-vino #{item.cantidad} reservas
+                                            .w-full.bg-gray-200.rounded-full.h-3
+                                                - const maxCantidad = reservasDiaSemanaFormatted[0] ? reservasDiaSemanaFormatted[0].cantidad : 1
+                                                - const porcentaje = (item.cantidad / maxCantidad) * 100
+                                                .h-3.rounded-full.transition-all(style=`width: ${porcentaje}%` class=index === 0 ? "bg-vino" : index === 1 ? "bg-dorado" : "bg-gray-500")
+                        else
+                            .text-center.py-8.text-gray-500
+                                p Sin datos suficientes
+
+                //- Top 7 días con más reservas
+                .bg-white.rounded-xl.shadow-xl.overflow-hidden
+                    .bg-gradient-dorado.text-white.px-6.py-4
+                        h3.text-xl.font-serif.font-bold  Top 7 Días con Más Reservas
+                        p.text-sm.opacity-80 Últimos 90 días
+                    .p-6
+                        if topDias.length
+                            .space-y-3
+                                each dia, index in topDias
+                                    .flex.items-center.justify-between.p-3.rounded-lg.transition-colors.hover_bg-gray-50
+                                        .flex.items-center.gap-3
+                                            .w-10.h-10.rounded-lg.flex.items-center.justify-center.text-white.font-bold(class=index === 0 ? "bg-yellow-500" : index === 1 ? "bg-gray-400" : index === 2 ? "bg-amber-600" : "bg-gray-300")
+                                                if index === 0
+                                                    span 
+                                                else if index === 1
+                                                    span 
+                                                else if index === 2
+                                                    span 
+                                                else
+                                                    span #{index + 1}
+                                            span.font-medium.text-gray-800 #{dia.get('fecha')}
+                                        span.px-3.py-1.bg-vino.text-white.rounded-full.text-sm.font-bold #{dia.get('cantidad')} reservas
+                        else
+                            .text-center.py-8.text-gray-500
+                                p Sin datos
+
+            //- Otra fila de contenido
+            .grid(class="grid-cols-1 lg:grid-cols-2 gap-8 mb-8")
+                
+                //- Estadísticas por Estado
+                .bg-white.rounded-xl.shadow-xl.overflow-hidden
+                    .bg-gradient-carbon.text-dorado.px-6.py-4
+                        h3.text-xl.font-serif.font-bold  Reservas por Estado
+                        p.text-sm.opacity-80 Distribución de estados (90 días)
+                    .p-6
+                        if estadisticasPorEstado.length
+                            .grid.grid-cols-2.gap-4
+                                each est in estadisticasPorEstado
+                                    - const estado = est.get('estado')
+                                    - const cantidad = est.get('cantidad')
+                                    - let bgColor = 'bg-gray-100'
+                                    - let textColor = 'text-gray-700'
+                                    - let emoji = ''
+                                    if estado === 'pendiente'
+                                        - bgColor = 'bg-yellow-100'
+                                        - textColor = 'text-yellow-700'
+                                        - emoji = ''
+                                    else if estado === 'confirmada'
+                                        - bgColor = 'bg-green-100'
+                                        - textColor = 'text-green-700'
+                                        - emoji = ''
+                                    else if estado === 'en_curso'
+                                        - bgColor = 'bg-blue-100'
+                                        - textColor = 'text-blue-700'
+                                        - emoji = ''
+                                    else if estado === 'completada'
+                                        - bgColor = 'bg-indigo-100'
+                                        - textColor = 'text-indigo-700'
+                                        - emoji = ''
+                                    else if estado === 'cancelada'
+                                        - bgColor = 'bg-red-100'
+                                        - textColor = 'text-red-700'
+                                        - emoji = ''
+                                    else if estado === 'no_show'
+                                        - bgColor = 'bg-orange-100'
+                                        - textColor = 'text-orange-700'
+                                        - emoji = ''
+                                    .p-4.rounded-xl.text-center(class=bgColor)
+                                        span.text-2xl #{emoji}
+                                        p.text-2xl.font-bold.mt-2(class=textColor) #{cantidad}
+                                        p.text-sm.capitalize.font-medium(class=textColor) #{estado.replace('_', ' ')}
+                        else
+                            .text-center.py-8.text-gray-500
+                                p Sin datos
+
+                //- Estadísticas por Canal
+                .bg-white.rounded-xl.shadow-xl.overflow-hidden
+                    .bg-gradient-oliva.text-white.px-6.py-4
+                        h3.text-xl.font-serif.font-bold  Reservas por Canal
+                        p.text-sm.opacity-80 Origen de las reservas (90 días)
+                    .p-6
+                        if estadisticasPorCanal.length
+                            .space-y-4
+                                each canal in estadisticasPorCanal
+                                    - const canalNombre = canal.get('canal')
+                                    - const cantidad = canal.get('cantidad')
+                                    - let emoji = ''
+                                    - let color = 'bg-gray-500'
+                                    if canalNombre === 'web'
+                                        - emoji = ''
+                                        - color = 'bg-blue-500'
+                                    else if canalNombre === 'telefono'
+                                        - emoji = ''
+                                        - color = 'bg-green-500'
+                                    else if canalNombre === 'presencial'
+                                        - emoji = ''
+                                        - color = 'bg-purple-500'
+                                    .flex.items-center.justify-between.p-4.bg-gray-50.rounded-xl
+                                        .flex.items-center.gap-4
+                                            .w-12.h-12.rounded-xl.flex.items-center.justify-center.text-white.text-xl(class=color) #{emoji}
+                                            div
+                                                p.font-bold.text-gray-800.capitalize #{canalNombre}
+                                                p.text-sm.text-gray-500 #{cantidad} reservas
+                                        .text-right
+                                            - const total = estadisticasPorCanal.reduce((acc, c) => acc + parseInt(c.get('cantidad')), 0)
+                                            - const porcentaje = total > 0 ? ((cantidad / total) * 100).toFixed(1) : 0
+                                            p.text-2xl.font-bold.text-vino #{porcentaje}%
+                        else
+                            .text-center.py-8.text-gray-500
+                                p Sin datos
+
+            //- Ocupación por Mesa
+            .bg-white.rounded-xl.shadow-xl.overflow-hidden.mb-8
+                .bg-vino.text-dorado.px-6.py-4.flex.justify-between.items-center
+                    div
+                        h3.text-xl.font-serif.font-bold 🪑 Ocupación por Mesa
+                        p.text-sm.opacity-80 Últimos 30 días
+                .p-6
+                    if ocupacionMesas.length
+                        .grid(class="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4")
+                            each mesa in ocupacionMesas
+                                - const mesaData = mesa.mesa || {}
+                                .p-4.rounded-xl.border-2.border-gray-200.hover_border-vino.transition-colors.cursor-default
+                                    .flex.items-center.justify-between.mb-3
+                                        .flex.items-center.gap-3
+                                            .w-10.h-10.rounded-lg.bg-gradient-to-br.from-vino.to-red-700.flex.items-center.justify-center
+                                                span.text-white.text-sm.font-bold #{mesa.id_mesa || '?'}
+                                            div
+                                                p.font-bold.text-gray-800 #{mesaData.nombre || 'Sin nombre'}
+                                                if mesaData.zona
+                                                    p.text-xs.text-gray-500.capitalize #{mesaData.zona}
+                                        .text-right
+                                            p.text-2xl.font-bold.text-vino #{mesa.get('reservas')}
+                                            p.text-xs.text-gray-500 reservas
+                                    if mesaData.capacidad
+                                        .flex.items-center.justify-between.text-sm.text-gray-600.pt-2.border-t.border-gray-100
+                                            span Capacidad
+                                            span.font-semibold #{mesaData.capacidad} personas
+                    else
+                        .text-center.py-12.text-gray-500
+                            .text-4xl.mb-4 
+                            p No hay datos de ocupación de mesas
+
+            //- Horas más populares
+            .bg-white.rounded-xl.shadow-xl.overflow-hidden
+                .bg-gradient-dorado.text-white.px-6.py-4
+                    h3.text-xl.font-serif.font-bold  Horas Más Populares
+                    p.text-sm.opacity-80 Top 5 horarios preferidos (90 días)
+                .p-6
+                    if horasMasPopulares.length
+                        .flex.flex-wrap.gap-4.justify-center
+                            each hora, index in horasMasPopulares
+                                .text-center.p-4.rounded-xl(style="min-width: 120px" class=index === 0 ? "bg-vino text-white" : "bg-gray-100")
+                                    p.text-3xl.font-bold #{hora.get('hora')}:00
+                                    p.text-sm.opacity-80 #{hora.get('cantidad')} reservas
+                                    if index === 0
+                                        span.inline-block.mt-2.text-xs.bg-dorado.text-vino.px-2.py-1.rounded-full.font-bold  Más popular
+                    else
+                        .text-center.py-8.text-gray-500
+                            p Sin datos de horarios
+
+    style.
+        /* Estilos base */
+        .admin-panel-container { margin: 0; min-height: 100vh; }
+        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
+        .admin-sidebar.open { transform: translateX(0); }
+        .sidebar-header { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.5rem; color: #F2EADF; font-weight: 500; transition: all 0.3s ease; cursor: pointer; }
+        .nav-item:hover { background: rgba(199, 168, 108, 0.15); transform: translateX(4px); color: #C7A86C; }
+        .nav-item.active { background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%); border-left: 3px solid #C7A86C; color: #C7A86C; }
+        .nav-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
+        .admin-content { margin-left: 0; min-height: 100vh; }
+        
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .stat-icon { width: 3rem; height: 3rem; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; padding: 0.5rem; }
+        .stat-icon svg { width: 100%; height: 100%; color: white; }
+        
+        .bg-gradient-vino { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
+        .bg-gradient-dorado { background: linear-gradient(135deg, #C7A86C 0%, #D4B87A 100%); }
+        .bg-gradient-carbon { background: linear-gradient(135deg, #3C4430 0%, #4A5238 100%); }
+        .bg-gradient-oliva { background: linear-gradient(135deg, #7D8C5A 0%, #8B9A68 100%); }
+        
+        .sidebar-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 150; }
+        
+        @media (min-width: 769px) {
+            .admin-sidebar { transform: translateX(0); }
+            .admin-content { margin-left: 280px; }
+            .sidebar-toggle { display: none; }
+        }
+
+    script.
+        // Toggle sidebar en móviles
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) sidebar.classList.remove('open');
+                }
+            });
+        }
