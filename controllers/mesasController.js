@@ -16,14 +16,86 @@ const listarMesas = async (req, res) => {
 
         const totalPages = Math.ceil(count / limit);
 
+        // Calcular ocupación de mesas para hoy
+        const hoy = new Date().toISOString().split("T")[0];
+        const horaActual = new Date().toTimeString().split(" ")[0]; // HH:MM:SS
+
+        // Obtener todas las mesas para estadísticas globales
+        const todasLasMesas = await Mesa.findAll();
+
+        // Calcular estado de ocupación para cada mesa
+        const mesasConOcupacion = await Promise.all(mesas.map(async (mesa) => {
+            const mesaData = mesa.toJSON();
+
+            // Buscar si hay reserva activa ahora mismo
+            const reservaActiva = await Reserva.findOne({
+                where: {
+                    id_mesa: mesa.id,
+                    fecha_reserva: hoy,
+                    estado: {
+                        [Op.in]: ["confirmada", "en_curso"]
+                    },
+                    hora_inicio: { [Op.lte]: horaActual },
+                    hora_fin: { [Op.gte]: horaActual }
+                }
+            });
+
+            // Buscar próxima reserva del día
+            const proximaReserva = await Reserva.findOne({
+                where: {
+                    id_mesa: mesa.id,
+                    fecha_reserva: hoy,
+                    estado: {
+                        [Op.in]: ["pendiente", "confirmada"]
+                    },
+                    hora_inicio: { [Op.gt]: horaActual }
+                },
+                order: [["hora_inicio", "ASC"]]
+            });
+
+            mesaData.ocupada = !!reservaActiva;
+            mesaData.proximaReserva = proximaReserva ? {
+                hora: proximaReserva.hora_inicio,
+                estado: proximaReserva.estado
+            } : null;
+
+            return mesaData;
+        }));
+
+        // Estadísticas globales de ocupación
+        let mesasOcupadasCount = 0;
+        let mesasDisponiblesCount = 0;
+
+        for (const mesa of todasLasMesas) {
+            const reservaActiva = await Reserva.findOne({
+                where: {
+                    id_mesa: mesa.id,
+                    fecha_reserva: hoy,
+                    estado: { [Op.in]: ["confirmada", "en_curso"] },
+                    hora_inicio: { [Op.lte]: horaActual },
+                    hora_fin: { [Op.gte]: horaActual }
+                }
+            });
+
+            if (reservaActiva) {
+                mesasOcupadasCount++;
+            } else if (mesa.estado === "activa") {
+                mesasDisponiblesCount++;
+            }
+        }
+
         res.render("mesas/index", {
             csrfToken: req.csrfToken(),
-            mesas,
+            mesas: mesasConOcupacion,
             usuario: req.usuario,
             messages: req.flash(),
             currentPage: page,
             totalPages,
-            totalMesas: count
+            totalMesas: count,
+            mesasOcupadas: mesasOcupadasCount,
+            mesasDisponibles: mesasDisponiblesCount,
+            fechaActual: hoy,
+            horaActual: horaActual.slice(0, 5)
         });
 
     } catch (error) {
