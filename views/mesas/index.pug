@@ -96,34 +96,53 @@ block contenido
 
         .mesas-stats
           .stat-card
-            .stat-icon.bg-vino
+            .stat-icon.bg-gray-700
               svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
                 path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
             .stat-info
               .stat-value= totalMesas
-              .stat-label Total de Mesas
+              .stat-label Total Mesas
           
           .stat-card
-            .stat-icon.bg-dorado
+            .stat-icon(class="bg-red-500")
               svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
-                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
             .stat-info
-              .stat-value= currentPage
-              .stat-label Página Actual
+              .stat-value= mesasOcupadas || 0
+              .stat-label Ocupadas Ahora
+              
+          .stat-card
+            .stat-icon(class="bg-green-500")
+              svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z")
+            .stat-info
+              .stat-value= mesasDisponibles || 0
+              .stat-label Disponibles
 
         if mesas.length
           .mesas-map
             each mesa, index in mesas
-              .mesa-card(class=`zona-${mesa.zona || 'general'}` data-mesa-id=mesa.id)
+              - const isOcupada = mesa.ocupada
+              .mesa-card(class=`zona-${mesa.zona || 'general'} ${isOcupada ? 'border-red-500 ring-2 ring-red-100' : ''}` data-mesa-id=mesa.id)
                 .mesa-card-header
-                  .mesa-number= mesa.nombre
-                  .mesa-status(class=mesa.estado === 'activa' ? 'status-active' : 'status-inactive')
-                    span= mesa.estado === 'activa' ? '●' : '○'
+                  .mesa-number
+                     | #{mesa.nombre}
+                     if isOcupada
+                        span.ml-2.text-xs.bg-red-100.text-red-600.px-2.py-1.rounded-full.border.border-red-200 Ocupada
+                     else if mesa.proximaReserva
+                         span.ml-2.text-xs.bg-yellow-100.text-yellow-700.px-2.py-1.rounded-full.border.border-yellow-200 Próx: #{mesa.proximaReserva.hora.slice(0,5)}
+                     else
+                        span.ml-2.text-xs.bg-green-100.text-green-600.px-2.py-1.rounded-full.border.border-green-200 Libre
+                  
+                  .mesa-status(title=mesa.estado === 'activa' ? 'Mesa Habilitada' : 'Mesa Deshabilitada')
+                    span(class=mesa.estado === 'activa' ? 'text-green-500' : 'text-gray-400') ●
                 
                 .mesa-card-body
-                  .mesa-icon
-                    svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                  .mesa-icon(class=isOcupada ? "bg-red-50" : "")
+                    svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class=isOcupada ? "text-red-500" : "text-vino")
                       rect(x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2")
+                      if isOcupada
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4")
                       
                   .mesa-info
                     .info-item

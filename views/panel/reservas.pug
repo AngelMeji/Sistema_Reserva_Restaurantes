@@ -91,6 +91,7 @@ block contenido
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Mesa Asignada
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Fecha y Hora
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Personas
+                                th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Observaciones
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Estado
                                 th.px-6.py-4.text-left.text-xs.font-bold.uppercase.tracking-wider Acciones
                         
@@ -111,7 +112,7 @@ block contenido
                                             else
                                                 span.text-xs.text-gray-500 Usuario no encontrado
                                         
-                                        //- Mesa Asignada (nueva columna)
+                                        //- Mesa Asignada
                                         td.px-6.py-4.whitespace-nowrap
                                             if reserva.mesa
                                                 .flex.items-center.gap-2
@@ -139,6 +140,34 @@ block contenido
                                         td.px-6.py-4.whitespace-nowrap.text-sm.text-gray-500
                                             span.px-2.inline-flex.text-xs.leading-5.font-semibold.rounded-full.bg-gray-100.text-gray-800 #{reserva.numero_personas} Pers.
                                         
+                                        //- Observaciones (cumpleaños, alergias, ubicación especial)
+                                        td.px-4.py-4.text-sm
+                                            if reserva.observaciones
+                                                .observaciones-cell
+                                                    //- Detectar iconos según contenido
+                                                    .observaciones-icons.flex.gap-1.mb-1
+                                                        if reserva.observaciones.toLowerCase().includes('cumpleaños') || reserva.observaciones.toLowerCase().includes('cumpleanos')
+                                                            span.obs-badge.obs-cumple(title="Cumpleaños") 
+                                                        if reserva.observaciones.toLowerCase().includes('alergia')
+                                                            span.obs-badge.obs-alergia(title="Alergias") ⚠️
+                                                        if reserva.observaciones.toLowerCase().includes('vegetariano') || reserva.observaciones.toLowerCase().includes('vegano')
+                                                            span.obs-badge.obs-dieta(title="Dieta especial") 
+                                                        if reserva.observaciones.toLowerCase().includes('niño') || reserva.observaciones.toLowerCase().includes('bebé') || reserva.observaciones.toLowerCase().includes('infantil')
+                                                            span.obs-badge.obs-ninos(title="Con niños") 
+                                                    
+                                                    //- Limpiar texto de 'Mesa asignada' para visualización más limpia (intento simple)
+                                                    - let obsTexto = reserva.observaciones.split('| Mesa asignada')[0].trim()
+                                                    //- Si quedó vacío porque solo tenía mesa asignada (reservas antiguas)
+                                                    if obsTexto === '' || obsTexto.startsWith('Mesa asignada:') 
+                                                        span.text-gray-400.text-xs -
+                                                    else
+                                                        .observaciones-text.text-xs.text-gray-600.max-w-xs.truncate(title=obsTexto)
+                                                            = obsTexto.length > 50 ? obsTexto.substring(0, 50) + '...' : obsTexto
+                                                        if obsTexto.length > 50
+                                                            button.text-xs.text-vino.underline.mt-1(type="button" onclick=`mostrarObservaciones('${obsTexto.replace(/'/g, "\\'")}')`) Ver más
+                                            else
+                                                span.text-gray-400.text-xs Sin observaciones
+                                        
                                         //- Estado editable
                                         td.px-6.py-4.whitespace-nowrap
                                             form.estado-form(action=`/admin/reservas/${reserva.id_reserva}/estado` method="POST")
@@ -154,7 +183,14 @@ block contenido
                                         
                                         //- Acciones
                                         td.px-6.py-4.whitespace-nowrap.text-sm.font-medium
-                                            .flex.gap-2
+                                            .flex.gap-2.flex-wrap
+                                                //- Botón reagendar
+                                                button.btn-reagendar.bg-blue-500.hover_bg-blue-600.text-white.px-3.py-1.rounded-lg.text-xs.font-semibold.transition-colors(
+                                                    type="button"
+                                                    onclick=`abrirModalReagendar(${reserva.id_reserva}, '${reserva.fecha_reserva}', '${reserva.hora_inicio}', '${reserva.usuario ? reserva.usuario.nombre : "Cliente"}')`
+                                                    title="Reagendar reserva"
+                                                )
+                                                    |  Reagendar
                                                 //- Botón eliminar
                                                 button.btn-eliminar.bg-red-500.hover_bg-red-600.text-white.px-3.py-1.rounded-lg.text-xs.font-semibold.transition-colors(
                                                     type="button"
@@ -163,7 +199,7 @@ block contenido
                                                     | Eliminar
                             else
                                 tr
-                                    td.px-6.py-4.whitespace-nowrap.text-center.text-gray-500(colspan="7") No hay reservas registradas
+                                    td.px-6.py-4.whitespace-nowrap.text-center.text-gray-500(colspan="8") No hay reservas registradas
 
     //- Modal de confirmación
     #modal-eliminar.modal-overlay.hidden
@@ -177,6 +213,60 @@ block contenido
                 form#form-eliminar(method="POST" style="display:inline")
                     input(type="hidden" name="_csrf" value=csrfToken)
                     button.bg-red-500.hover_bg-red-600.text-white.px-4.py-2.rounded-lg.font-semibold(type="submit") Eliminar
+
+    //- Modal de reagendar
+    #modal-reagendar.modal-overlay.hidden
+        .modal-content.modal-reagendar
+            .modal-header
+                h3.text-xl.font-bold.text-vino 📅 Reagendar Reserva
+                p#reagendar-cliente.text-sm.text-gray-500.mt-1 Cliente: 
+            .modal-body
+                form#form-reagendar(method="POST")
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    
+                    .mb-4
+                        label.block.text-sm.font-semibold.text-gray-700.mb-2(for="nueva_fecha") Nueva Fecha
+                        input#nueva_fecha.w-full.px-4.py-2.border-2.border-gray-200.rounded-lg.focus_border-vino.focus_outline-none.transition-colors(
+                            type="date"
+                            name="fecha_reserva"
+                            required
+                        )
+                    
+                    .mb-4
+                        label.block.text-sm.font-semibold.text-gray-700.mb-2(for="nueva_hora") Nueva Hora
+                        input#nueva_hora.w-full.px-4.py-2.border-2.border-gray-200.rounded-lg.focus_border-vino.focus_outline-none.transition-colors(
+                            type="time"
+                            name="hora_inicio"
+                            required
+                        )
+                    
+                    .mb-4
+                        label.block.text-sm.font-semibold.text-gray-700.mb-2(for="motivo") Motivo del reagendamiento
+                        textarea#motivo.w-full.px-4.py-2.border-2.border-gray-200.rounded-lg.focus_border-vino.focus_outline-none.transition-colors(
+                            name="motivo_reagendamiento"
+                            rows="3"
+                            placeholder="Ej: Solicitud del cliente, cambio de disponibilidad..."
+                        )
+                    
+                    .info-notificacion.bg-blue-50.border-l-4.border-blue-500.p-3.rounded.mb-4
+                        p.text-xs.text-blue-700
+                            strong ℹ️ Nota: 
+                            | Se notificará al cliente sobre el cambio de su reserva.
+                    
+                    .modal-footer
+                        button#btn-cancelar-reagendar.bg-gray-300.hover_bg-gray-400.text-gray-800.px-4.py-2.rounded-lg.font-semibold.mr-2(type="button") Cancelar
+                        button.bg-blue-500.hover_bg-blue-600.text-white.px-4.py-2.rounded-lg.font-semibold(type="submit") 
+                            | ✓ Confirmar Reagendamiento
+
+    //- Modal para ver observaciones completas
+    #modal-observaciones.modal-overlay.hidden
+        .modal-content
+            .modal-header
+                h3.text-xl.font-bold.text-vino 📝 Observaciones
+            .modal-body
+                p#observaciones-texto.text-gray-600.whitespace-pre-wrap
+            .modal-footer
+                button#btn-cerrar-obs.bg-vino.hover_bg-red-800.text-white.px-4.py-2.rounded-lg.font-semibold Cerrar
 
     style.
         /* Estilos base */
@@ -228,10 +318,57 @@ block contenido
             max-width: 400px;
             width: 90%;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+        .modal-reagendar {
+            max-width: 500px;
         }
         .modal-header { margin-bottom: 1rem; }
         .modal-body { margin-bottom: 1.5rem; }
         .modal-footer { display: flex; justify-content: flex-end; }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Estilos para observaciones */
+        .observaciones-cell {
+            min-width: 150px;
+            max-width: 250px;
+        }
+        .obs-badge {
+            display: inline-flex;
+            font-size: 1rem;
+            cursor: help;
+            transition: transform 0.2s;
+        }
+        .obs-badge:hover {
+            transform: scale(1.2);
+        }
+        .observaciones-text {
+            line-height: 1.4;
+        }
+        
+        /* Estilos para botón reagendar */
+        .btn-reagendar {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        }
+        .btn-reagendar:hover {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            transform: translateY(-1px);
+        }
+        
+        /* Focus styles para formulario */
+        .focus_border-vino:focus {
+            border-color: #6E1825 !important;
+        }
         
         @media (min-width: 769px) {
             .admin-sidebar { transform: translateX(0); }
@@ -268,9 +405,81 @@ block contenido
             });
         }
         
-        // Cerrar modal al hacer clic fuera
+        // Cerrar modal eliminar al hacer clic fuera
         if (modal) {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) modal.classList.add('hidden');
             });
         }
+
+        // ========== MODAL DE REAGENDAR ==========
+        const modalReagendar = document.getElementById('modal-reagendar');
+        const formReagendar = document.getElementById('form-reagendar');
+        const btnCancelarReagendar = document.getElementById('btn-cancelar-reagendar');
+        const inputNuevaFecha = document.getElementById('nueva_fecha');
+        const inputNuevaHora = document.getElementById('nueva_hora');
+        const textoCliente = document.getElementById('reagendar-cliente');
+
+        function abrirModalReagendar(id, fechaActual, horaActual, nombreCliente) {
+            // Configurar el action del formulario
+            formReagendar.action = `/admin/reservas/${id}/reagendar`;
+            
+            // Pre-llenar con los valores actuales
+            inputNuevaFecha.value = fechaActual;
+            inputNuevaHora.value = horaActual.substring(0, 5); // Tomar solo HH:MM
+            
+            // Mostrar nombre del cliente
+            textoCliente.textContent = `Cliente: ${nombreCliente}`;
+            
+            // Establecer fecha mínima como hoy
+            const hoy = new Date().toISOString().split('T')[0];
+            inputNuevaFecha.min = hoy;
+            
+            // Mostrar modal
+            modalReagendar.classList.remove('hidden');
+        }
+
+        if (btnCancelarReagendar) {
+            btnCancelarReagendar.addEventListener('click', () => {
+                modalReagendar.classList.add('hidden');
+            });
+        }
+
+        // Cerrar modal reagendar al hacer clic fuera
+        if (modalReagendar) {
+            modalReagendar.addEventListener('click', (e) => {
+                if (e.target === modalReagendar) modalReagendar.classList.add('hidden');
+            });
+        }
+
+        // ========== MODAL DE OBSERVACIONES ==========
+        const modalObservaciones = document.getElementById('modal-observaciones');
+        const observacionesTexto = document.getElementById('observaciones-texto');
+        const btnCerrarObs = document.getElementById('btn-cerrar-obs');
+
+        function mostrarObservaciones(texto) {
+            observacionesTexto.textContent = texto;
+            modalObservaciones.classList.remove('hidden');
+        }
+
+        if (btnCerrarObs) {
+            btnCerrarObs.addEventListener('click', () => {
+                modalObservaciones.classList.add('hidden');
+            });
+        }
+
+        // Cerrar modal observaciones al hacer clic fuera
+        if (modalObservaciones) {
+            modalObservaciones.addEventListener('click', (e) => {
+                if (e.target === modalObservaciones) modalObservaciones.classList.add('hidden');
+            });
+        }
+
+        // Cerrar todos los modales con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal?.classList.add('hidden');
+                modalReagendar?.classList.add('hidden');
+                modalObservaciones?.classList.add('hidden');
+            }
+        });

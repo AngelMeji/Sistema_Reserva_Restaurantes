@@ -92,6 +92,55 @@ const eliminarReserva = async (req, res) => {
     }
 };
 
+const reagendarReserva = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { fecha_reserva, hora_inicio, motivo_reagendamiento } = req.body;
+
+        const reserva = await Reserva.findByPk(id, {
+            include: [{ model: Usuario, as: "usuario", attributes: ["nombre", "email"] }]
+        });
+
+        if (!reserva) {
+            return res.status(404).json({ error: "Reserva no encontrada" });
+        }
+
+        // Guardar datos anteriores para la notificación
+        const fechaAnterior = reserva.fecha_reserva;
+        const horaAnterior = reserva.hora_inicio;
+
+        // Calcular nueva hora de fin (90 minutos después)
+        const [h, m] = hora_inicio.split(":").map(Number);
+        const finDate = new Date();
+        finDate.setHours(h, m, 0);
+        finDate.setMinutes(finDate.getMinutes() + 90);
+        const hora_fin = `${finDate.getHours().toString().padStart(2, "0")}:${finDate.getMinutes().toString().padStart(2, "0")}:00`;
+
+        // Actualizar la reserva
+        await reserva.update({
+            fecha_reserva,
+            hora_inicio,
+            hora_fin,
+            observaciones: reserva.observaciones
+                ? `${reserva.observaciones} | Reagendada el ${new Date().toLocaleDateString('es-ES')}: ${motivo_reagendamiento || 'Sin motivo especificado'}`
+                : `Reagendada el ${new Date().toLocaleDateString('es-ES')}: ${motivo_reagendamiento || 'Sin motivo especificado'}`
+        });
+
+        // Log para notificación (en un sistema real aquí se enviaría el email)
+        console.log(`📧 NOTIFICACIÓN DE REAGENDAMIENTO:`);
+        console.log(`   Cliente: ${reserva.usuario?.nombre || 'N/A'} (${reserva.usuario?.email || 'N/A'})`);
+        console.log(`   Reserva #${id} reagendada`);
+        console.log(`   De: ${fechaAnterior} ${horaAnterior}`);
+        console.log(`   A: ${fecha_reserva} ${hora_inicio}`);
+        console.log(`   Motivo: ${motivo_reagendamiento || 'No especificado'}`);
+
+        res.redirect("/admin/reservas");
+    } catch (error) {
+        console.error("Error al reagendar reserva:", error);
+        res.status(500).json({ error: "Error al reagendar la reserva" });
+    }
+};
+
 const verUsuarios = async (req, res) => {
     try {
         const usuarios = await Usuario.findAll();
@@ -133,4 +182,4 @@ const cambiarRolUsuario = async (req, res) => {
     }
 };
 
-export { panelPrincipal, verReservas, cambiarEstadoReserva, eliminarReserva, verUsuarios, cambiarRolUsuario };
+export { panelPrincipal, verReservas, cambiarEstadoReserva, eliminarReserva, reagendarReserva, verUsuarios, cambiarRolUsuario };

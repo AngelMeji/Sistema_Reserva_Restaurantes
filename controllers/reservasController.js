@@ -223,6 +223,9 @@ const crearReserva = async (req, res) => {
             });
         }
 
+        //si recepcionista hace la reserva el estado se pondra automaticamente en confirmado
+        const estadoFinal = usuarioReserva.rol === "cliente" ? "pendiente" : "confirmada";
+        
         // Crear la reserva con la mesa asignada
         const nuevaReserva = await Reserva.create({
             id_usuario: usuarioReserva.id,
@@ -231,11 +234,9 @@ const crearReserva = async (req, res) => {
             hora_inicio,
             hora_fin: null,
             numero_personas,
-            estado: "pendiente",
+            estado: estadoFinal,
             canal: canal || "web",
-            observaciones: observaciones
-                ? `${observaciones} | Mesa asignada: ${mesa.nombre} (${mesa.zona || 'Sin zona'})`
-                : `Mesa asignada: ${mesa.nombre} (${mesa.zona || 'Sin zona'})`,
+            observaciones: observaciones || null, // Guardar solo lo que escribió el usuario
             creado_por: usuarioReserva.id,
             dispositivo: dispositivo || "desktop",
         });
