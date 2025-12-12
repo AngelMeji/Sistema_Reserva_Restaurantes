@@ -3,7 +3,10 @@ extends ../layout/admin
 block contenido
     .admin-panel-container.flex.min-h-screen.bg-crema
         
-        //- Botón hamburguesa para móviles
+        //- Overlay para cerrar sidebar en móvil
+        #sidebar-overlay.sidebar-overlay.hidden
+        
+        //- Botón hamburguesa para móviles (derecha)
         button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
             svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
                 path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
@@ -276,19 +279,49 @@ block contenido
     style.
         /* Estilos base */
         .admin-panel-container { margin: 0; min-height: 100vh; }
-        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
+        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 200; transform: translateX(-100%); transition: transform 0.3s ease; }
         .admin-sidebar.open { transform: translateX(0); }
         .sidebar-header { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
         .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.5rem; color: #F2EADF; font-weight: 500; transition: all 0.3s ease; cursor: pointer; }
         .nav-item:hover { background: rgba(199, 168, 108, 0.15); transform: translateX(4px); color: #C7A86C; }
         .nav-item.active { background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%); border-left: 3px solid #C7A86C; color: #C7A86C; }
         .nav-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
-        .admin-content { margin-left: 0; min-height: 100vh; }
+        .admin-content { margin-left: 0; min-height: 100vh; padding-top: 4rem; }
         
         .bg-gradient-vino { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
         .bg-gradient-dorado { background: linear-gradient(135deg, #C7A86C 0%, #D4B87A 100%); }
         
-        .sidebar-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 150; }
+        .sidebar-toggle { 
+            position: fixed; 
+            top: 1rem; 
+            right: 1rem; 
+            z-index: 150; 
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .sidebar-toggle.hidden { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(0.8);
+        }
+        
+        /* Overlay para cerrar sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sidebar-overlay.hidden { display: none; }
         
         .policy-card { transition: all 0.3s ease; }
         .policy-card:hover { border-color: #C7A86C; transform: translateX(4px); }
@@ -307,19 +340,32 @@ block contenido
         
         @media (min-width: 769px) {
             .admin-sidebar { transform: translateX(0); }
-            .admin-content { margin-left: 280px; }
+            .admin-content { margin-left: 280px; padding-top: 0; }
             .sidebar-toggle { display: none; }
+            .sidebar-overlay { display: none; }
         }
 
     script.
         // Toggle sidebar en móviles
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const sidebar = document.getElementById('sidebar');
-        if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768) {
-                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) sidebar.classList.remove('open');
-                }
-            });
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.remove('hidden');
+            sidebarOverlay.classList.add('active');
+            sidebarToggle.classList.add('hidden');
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+            sidebarToggle.classList.remove('hidden');
+        }
+        
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            sidebarToggle.addEventListener('click', openSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
         }

@@ -3,7 +3,10 @@ extends ../layout/admin
 block contenido
     .admin-panel-container.flex.min-h-screen.bg-crema
         
-        //- Botón hamburguesa para móviles
+        //- Overlay para cerrar sidebar en móvil
+        #sidebar-overlay.sidebar-overlay.hidden
+        
+        //- Botón hamburguesa para móviles (derecha)
         button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
             svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
                 path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
@@ -80,8 +83,84 @@ block contenido
                     h1.text-4xl.font-serif.text-vino.font-bold.mb-2 Gestión de Reservas
                     p.text-lg.text-gray-700 Listado completo de reservas realizadas
             
-            //- Contenedor de la tabla
-            .bg-white.rounded-xl.shadow-xl.overflow-hidden
+            //- Vista de tarjetas para móvil
+            .mobile-cards-container.block(class="md:hidden")
+                if reservas.length
+                    .grid.gap-4
+                        each reserva in reservas
+                            .reservation-card.bg-white.rounded-xl.shadow-lg.p-4.border-l-4(
+                                class=reserva.estado === 'confirmada' ? 'border-green-500' : reserva.estado === 'pendiente' ? 'border-yellow-500' : reserva.estado === 'cancelada' ? 'border-red-500' : reserva.estado === 'en_curso' ? 'border-blue-500' : reserva.estado === 'completada' ? 'border-gray-500' : 'border-orange-500'
+                            )
+                                //- Header de la tarjeta
+                                .flex.justify-between.items-start.mb-3
+                                    .flex.items-center.gap-3
+                                        .w-10.h-10.rounded-lg.bg-gradient-to-br.from-vino.to-red-800.flex.items-center.justify-center.shadow-md
+                                            span.text-white.font-bold.text-xs ##{reserva.id_reserva}
+                                        div
+                                            if reserva.usuario
+                                                h3.font-bold.text-gray-900.text-sm #{reserva.usuario.nombre}
+                                                p.text-xs.text-gray-500 #{reserva.usuario.email}
+                                            else
+                                                h3.font-bold.text-gray-400.text-sm Usuario no encontrado
+                                    //- Estado badge
+                                    form.estado-form(action=`/admin/reservas/${reserva.id_reserva}/estado` method="POST")
+                                        input(type="hidden" name="_csrf" value=csrfToken)
+                                        select.estado-select-mobile.text-xs.font-semibold.rounded-lg.px-2.py-1.cursor-pointer(name="estado" onchange="this.form.submit()")
+                                            option(value="pendiente" selected=(reserva.estado === "pendiente")) Pendiente
+                                            option(value="confirmada" selected=(reserva.estado === "confirmada")) Confirmada
+                                            option(value="en_curso" selected=(reserva.estado === "en_curso")) En Curso
+                                            option(value="completada" selected=(reserva.estado === "completada")) Completada
+                                            option(value="cancelada" selected=(reserva.estado === "cancelada")) Cancelada
+                                            option(value="no_show" selected=(reserva.estado === "no_show")) No Show
+                                
+                                //- Información de la reserva
+                                .grid.grid-cols-2.gap-3.text-sm.mb-3
+                                    .flex.items-center.gap-2
+                                        svg.w-4.h-4.text-vino(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                                        span.text-gray-700 #{reserva.fecha_reserva}
+                                    .flex.items-center.gap-2
+                                        svg.w-4.h-4.text-vino(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z")
+                                        span.text-gray-700 #{reserva.hora_inicio}
+                                    .flex.items-center.gap-2
+                                        svg.w-4.h-4.text-vino(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z")
+                                        span.text-gray-700 #{reserva.numero_personas} personas
+                                    .flex.items-center.gap-2
+                                        if reserva.mesa
+                                            svg.w-4.h-4.text-vino(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z")
+                                            span.text-gray-700.font-semibold #{reserva.mesa.nombre}
+                                        else
+                                            span.text-orange-500.text-xs Sin mesa
+                                
+                                //- Observaciones (si existen)
+                                if reserva.observaciones
+                                    - let obsTexto = reserva.observaciones.split('| Mesa asignada')[0].trim()
+                                    if obsTexto && !obsTexto.startsWith('Mesa asignada:')
+                                        .bg-gray-50.rounded-lg.p-2.mb-3
+                                            .flex.items-start.gap-2
+                                                span.text-gray-500.text-xs Obs:
+                                                p.text-xs.text-gray-600.line-clamp-2= obsTexto
+                                
+                                //- Acciones
+                                .flex.gap-2.pt-2.border-t.border-gray-100
+                                    button.flex-1.bg-blue-500.hover_bg-blue-600.text-white.px-3.py-2.rounded-lg.text-xs.font-semibold.transition-colors(
+                                        type="button"
+                                        onclick=`abrirModalReagendar(${reserva.id_reserva}, '${reserva.fecha_reserva}', '${reserva.hora_inicio}', '${reserva.usuario ? reserva.usuario.nombre : "Cliente"}')`
+                                    )
+                                        | Reagendar
+                                    button.flex-1.bg-red-500.hover_bg-red-600.text-white.px-3.py-2.rounded-lg.text-xs.font-semibold.transition-colors(
+                                        type="button"
+                                        onclick=`confirmarEliminar(${reserva.id_reserva})`
+                                    )
+                                        | Eliminar
+                else
+                    .text-center.py-8.text-gray-500 No hay reservas registradas
+
+            //- Contenedor de la tabla (solo desktop)
+            .bg-white.rounded-xl.shadow-xl.overflow-hidden.hidden(class="md:block")
                 .overflow-x-auto
                     table.min-w-full.divide-y.divide-gray-200
                         thead.bg-gradient-vino.text-dorado
@@ -112,7 +191,6 @@ block contenido
                                             else
                                                 span.text-xs.text-gray-500 Usuario no encontrado
                                         
-                                        //- Mesa Asignada
                                         td.px-6.py-4.whitespace-nowrap
                                             if reserva.mesa
                                                 .flex.items-center.gap-2
@@ -140,24 +218,20 @@ block contenido
                                         td.px-6.py-4.whitespace-nowrap.text-sm.text-gray-500
                                             span.px-2.inline-flex.text-xs.leading-5.font-semibold.rounded-full.bg-gray-100.text-gray-800 #{reserva.numero_personas} Pers.
                                         
-                                        //- Observaciones (cumpleaños, alergias, ubicación especial)
                                         td.px-4.py-4.text-sm
                                             if reserva.observaciones
                                                 .observaciones-cell
-                                                    //- Detectar iconos según contenido
                                                     .observaciones-icons.flex.gap-1.mb-1
                                                         if reserva.observaciones.toLowerCase().includes('cumpleaños') || reserva.observaciones.toLowerCase().includes('cumpleanos')
-                                                            span.obs-badge.obs-cumple(title="Cumpleaños") 
+                                                            span.obs-badge.obs-cumple.text-xs.bg-pink-100.text-pink-600.px-1.rounded(title="Cumpleaños") Cumple
                                                         if reserva.observaciones.toLowerCase().includes('alergia')
-                                                            span.obs-badge.obs-alergia(title="Alergias") ⚠️
+                                                            span.obs-badge.obs-alergia.text-xs.bg-red-100.text-red-600.px-1.rounded(title="Alergias") Alergia
                                                         if reserva.observaciones.toLowerCase().includes('vegetariano') || reserva.observaciones.toLowerCase().includes('vegano')
-                                                            span.obs-badge.obs-dieta(title="Dieta especial") 
+                                                            span.obs-badge.obs-dieta.text-xs.bg-green-100.text-green-600.px-1.rounded(title="Dieta especial") Dieta
                                                         if reserva.observaciones.toLowerCase().includes('niño') || reserva.observaciones.toLowerCase().includes('bebé') || reserva.observaciones.toLowerCase().includes('infantil')
-                                                            span.obs-badge.obs-ninos(title="Con niños") 
+                                                            span.obs-badge.obs-ninos.text-xs.bg-blue-100.text-blue-600.px-1.rounded(title="Con niños") Niños
                                                     
-                                                    //- Limpiar texto de 'Mesa asignada' para visualización más limpia (intento simple)
                                                     - let obsTexto = reserva.observaciones.split('| Mesa asignada')[0].trim()
-                                                    //- Si quedó vacío porque solo tenía mesa asignada (reservas antiguas)
                                                     if obsTexto === '' || obsTexto.startsWith('Mesa asignada:') 
                                                         span.text-gray-400.text-xs -
                                                     else
@@ -168,30 +242,26 @@ block contenido
                                             else
                                                 span.text-gray-400.text-xs Sin observaciones
                                         
-                                        //- Estado editable
                                         td.px-6.py-4.whitespace-nowrap
                                             form.estado-form(action=`/admin/reservas/${reserva.id_reserva}/estado` method="POST")
                                                 input(type="hidden" name="_csrf" value=csrfToken)
                                                 select.estado-select.text-xs.font-semibold.rounded-lg.px-2.py-1.cursor-pointer(name="estado" onchange="this.form.submit()")
                                                 
-                                                    option(value="pendiente" selected=(reserva.estado === "pendiente"))  Pendiente
-                                                    option(value="confirmada" selected=(reserva.estado === "confirmada"))  Confirmada
-                                                    option(value="en_curso" selected=(reserva.estado === "en_curso"))  En Curso
-                                                    option(value="completada" selected=(reserva.estado === "completada"))  Completada
-                                                    option(value="cancelada" selected=(reserva.estado === "cancelada"))  Cancelada
-                                                    option(value="no_show" selected=(reserva.estado === "no_show"))  No Show
+                                                    option(value="pendiente" selected=(reserva.estado === "pendiente")) Pendiente
+                                                    option(value="confirmada" selected=(reserva.estado === "confirmada")) Confirmada
+                                                    option(value="en_curso" selected=(reserva.estado === "en_curso")) En Curso
+                                                    option(value="completada" selected=(reserva.estado === "completada")) Completada
+                                                    option(value="cancelada" selected=(reserva.estado === "cancelada")) Cancelada
+                                                    option(value="no_show" selected=(reserva.estado === "no_show")) No Show
                                         
-                                        //- Acciones
                                         td.px-6.py-4.whitespace-nowrap.text-sm.font-medium
                                             .flex.gap-2.flex-wrap
-                                                //- Botón reagendar
                                                 button.btn-reagendar.bg-blue-500.hover_bg-blue-600.text-white.px-3.py-1.rounded-lg.text-xs.font-semibold.transition-colors(
                                                     type="button"
                                                     onclick=`abrirModalReagendar(${reserva.id_reserva}, '${reserva.fecha_reserva}', '${reserva.hora_inicio}', '${reserva.usuario ? reserva.usuario.nombre : "Cliente"}')`
                                                     title="Reagendar reserva"
                                                 )
-                                                    |  Reagendar
-                                                //- Botón eliminar
+                                                    | Reagendar
                                                 button.btn-eliminar.bg-red-500.hover_bg-red-600.text-white.px-3.py-1.rounded-lg.text-xs.font-semibold.transition-colors(
                                                     type="button"
                                                     onclick=`confirmarEliminar(${reserva.id_reserva})`
@@ -218,7 +288,7 @@ block contenido
     #modal-reagendar.modal-overlay.hidden
         .modal-content.modal-reagendar
             .modal-header
-                h3.text-xl.font-bold.text-vino 📅 Reagendar Reserva
+                h3.text-xl.font-bold.text-vino Reagendar Reserva
                 p#reagendar-cliente.text-sm.text-gray-500.mt-1 Cliente: 
             .modal-body
                 form#form-reagendar(method="POST")
@@ -250,19 +320,19 @@ block contenido
                     
                     .info-notificacion.bg-blue-50.border-l-4.border-blue-500.p-3.rounded.mb-4
                         p.text-xs.text-blue-700
-                            strong ℹ️ Nota: 
+                            strong Nota: 
                             | Se notificará al cliente sobre el cambio de su reserva.
                     
                     .modal-footer
                         button#btn-cancelar-reagendar.bg-gray-300.hover_bg-gray-400.text-gray-800.px-4.py-2.rounded-lg.font-semibold.mr-2(type="button") Cancelar
                         button.bg-blue-500.hover_bg-blue-600.text-white.px-4.py-2.rounded-lg.font-semibold(type="submit") 
-                            | ✓ Confirmar Reagendamiento
+                            | Confirmar Reagendamiento
 
     //- Modal para ver observaciones completas
     #modal-observaciones.modal-overlay.hidden
         .modal-content
             .modal-header
-                h3.text-xl.font-bold.text-vino 📝 Observaciones
+                h3.text-xl.font-bold.text-vino Observaciones
             .modal-body
                 p#observaciones-texto.text-gray-600.whitespace-pre-wrap
             .modal-footer
@@ -271,16 +341,46 @@ block contenido
     style.
         /* Estilos base */
         .admin-panel-container { margin: 0; min-height: 100vh; }
-        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
+        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 200; transform: translateX(-100%); transition: transform 0.3s ease; }
         .admin-sidebar.open { transform: translateX(0); }
         .sidebar-header { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
         .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.5rem; color: #F2EADF; font-weight: 500; transition: all 0.3s ease; cursor: pointer; }
         .nav-item:hover { background: rgba(199, 168, 108, 0.15); transform: translateX(4px); color: #C7A86C; }
         .nav-item.active { background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%); border-left: 3px solid #C7A86C; color: #C7A86C; }
         .nav-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
-        .admin-content { margin-left: 0; min-height: 100vh; }
+        .admin-content { margin-left: 0; min-height: 100vh; padding-top: 4rem; }
         .bg-gradient-vino { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
-        .sidebar-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 150; }
+        .sidebar-toggle { 
+            position: fixed; 
+            top: 1rem; 
+            right: 1rem; 
+            z-index: 150; 
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .sidebar-toggle.hidden { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(0.8);
+        }
+        
+        /* Overlay para cerrar sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sidebar-overlay.hidden { display: none; }
         
         /* Select de estado */
         .estado-select {
@@ -372,21 +472,54 @@ block contenido
         
         @media (min-width: 769px) {
             .admin-sidebar { transform: translateX(0); }
-            .admin-content { margin-left: 280px; }
+            .admin-content { margin-left: 280px; padding-top: 0; }
             .sidebar-toggle { display: none; }
+            .sidebar-overlay { display: none; }
+        }
+        
+        /* Tarjetas de reserva en móvil */
+        .reservation-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .reservation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .estado-select-mobile {
+            border: 2px solid #e5e7eb;
+            background-color: white;
+            transition: all 0.2s ease;
         }
 
     script.
         // Toggle sidebar en móviles
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const sidebar = document.getElementById('sidebar');
-        if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768) {
-                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) sidebar.classList.remove('open');
-                }
-            });
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.remove('hidden');
+            sidebarOverlay.classList.add('active');
+            sidebarToggle.classList.add('hidden');
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+            sidebarToggle.classList.remove('hidden');
+        }
+        
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            sidebarToggle.addEventListener('click', openSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
         }
         
         // Modal de eliminación

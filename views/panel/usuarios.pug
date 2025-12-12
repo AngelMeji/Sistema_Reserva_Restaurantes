@@ -3,7 +3,10 @@ extends ../layout/admin
 block contenido
     .admin-panel-container.flex.min-h-screen.bg-crema
         
-        //- Botón hamburguesa para móviles
+        //- Overlay para cerrar sidebar en móvil
+        #sidebar-overlay.sidebar-overlay.hidden
+        
+        //- Botón hamburguesa para móviles (derecha)
         button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
             svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
                 path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
@@ -80,8 +83,51 @@ block contenido
                     h1.text-4xl.font-serif.text-vino.font-bold.mb-2 Gestión de Usuarios
                     p.text-lg.text-gray-700 Administra los usuarios y sus roles
             
-            //- Contenedor de la tabla
-            .bg-white.rounded-xl.shadow-xl.overflow-hidden
+            //- Vista de tarjetas para móvil
+            .mobile-cards-container.block(class="md:hidden")
+                if usuarios.length
+                    .grid.gap-4
+                        each u in usuarios
+                            .user-card.bg-white.rounded-xl.shadow-lg.p-4.border-l-4(
+                                class=u.estado === 'activo' ? 'border-green-500' : 'border-red-500'
+                            )
+                                .flex.justify-between.items-start.mb-3
+                                    .flex.items-center.gap-3
+                                        .w-10.h-10.rounded-full.bg-gradient-to-br.from-vino.to-red-800.flex.items-center.justify-center
+                                            span.text-white.font-bold.text-sm #{u.nombre.charAt(0).toUpperCase()}
+                                        div
+                                            h3.font-bold.text-gray-900 #{u.nombre}
+                                            p.text-xs.text-gray-500 ID: ##{u.id}
+                                    if u.estado === 'activo'
+                                        span.px-2.py-1.text-xs.font-semibold.rounded-full.bg-green-100.text-green-800 Activo
+                                    else
+                                        span.px-2.py-1.text-xs.font-semibold.rounded-full.bg-red-100.text-red-800 Inactivo
+                                
+                                .space-y-2.text-sm
+                                    .flex.items-center.gap-2.text-gray-600
+                                        svg.w-4.h-4(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z")
+                                        span.truncate #{u.email}
+                                    
+                                    .flex.items-center.justify-between.pt-2.border-t.border-gray-100
+                                        span.text-xs.text-gray-500 Rol:
+                                        if u.id === usuario.id
+                                            span.px-2.py-1.text-xs.font-semibold.rounded-full.bg-purple-100.text-purple-800 #{u.rol.toUpperCase()} (Tú)
+                                        else
+                                            form.rol-form(action=`/admin/usuarios/${u.id}/rol` method="POST")
+                                                input(type="hidden" name="_csrf" value=csrfToken)
+                                                select.rol-select.text-xs.font-semibold.rounded-lg.px-2.py-1.cursor-pointer.border-2.border-gray-200(name="rol" onchange="this.form.submit()")
+                                                    option(value="cliente" selected=(u.rol === "cliente")) Usuario
+                                                    option(value="recepcionista" selected=(u.rol === "recepcionista")) Recepcionista
+                                                    if u.rol === 'admin'
+                                                        option(value="admin" selected disabled) Admin
+                                                    if u.rol === 'mesero'
+                                                        option(value="mesero" selected disabled) Mesero
+                else
+                    .text-center.py-8.text-gray-500 No hay usuarios registrados
+
+            //- Contenedor de la tabla (solo desktop)
+            .bg-white.rounded-xl.shadow-xl.overflow-hidden.hidden(class="md:block")
                 .overflow-x-auto
                     table.min-w-full.divide-y.divide-gray-200
                         thead.bg-gradient-vino.text-dorado
@@ -103,20 +149,14 @@ block contenido
                                         td.px-6.py-4.whitespace-nowrap.text-sm.text-gray-500 #{u.email}
                                         
                                         td.px-6.py-4.whitespace-nowrap
-                                            //- Verificar si el usuario a editar es el mismo que está logueado o es otro admin (opcional: quitar admin de la lista de editables)
                                             if u.id === usuario.id
                                                 span.px-2.inline-flex.text-xs.leading-5.font-semibold.rounded-full.bg-purple-100.text-purple-800 #{u.rol.toUpperCase()} (Tú)
                                             else
                                                 form.rol-form(action=`/admin/usuarios/${u.id}/rol` method="POST")
                                                     input(type="hidden" name="_csrf" value=csrfToken)
                                                     select.rol-select.text-xs.font-semibold.rounded-lg.px-2.py-1.cursor-pointer(name="rol" onchange="this.form.submit()")
-                                                        //- Opciones permitidas: Cliente (Usuario) y Recepcionista
-                                                        //- Si el rol actual no es ninguno de esos (ej. admin, mesero), lo mostramos como opción seleccionada pero tal vez deshabilitada o simplemente seleccionada
-                                                        
                                                         option(value="cliente" selected=(u.rol === "cliente"))  Usuario
                                                         option(value="recepcionista" selected=(u.rol === "recepcionista"))  Recepcionista
-                                                        
-                                                        //- Si es admin o mesero, mostrarlo para indicar estado actual, pero si cambia a otro no podrá volver (a menos que backend lo permita)
                                                         if u.rol === 'admin'
                                                             option(value="admin" selected disabled)  Admin
                                                         if u.rol === 'mesero'
@@ -135,16 +175,57 @@ block contenido
     style.
         /* Estilos reutilizados */
         .admin-panel-container { margin: 0; min-height: 100vh; }
-        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
+        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 200; transform: translateX(-100%); transition: transform 0.3s ease; }
         .admin-sidebar.open { transform: translateX(0); }
         .sidebar-header { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
         .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.5rem; color: #F2EADF; font-weight: 500; transition: all 0.3s ease; cursor: pointer; }
         .nav-item:hover { background: rgba(199, 168, 108, 0.15); transform: translateX(4px); color: #C7A86C; }
         .nav-item.active { background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%); border-left: 3px solid #C7A86C; color: #C7A86C; }
         .nav-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
-        .admin-content { margin-left: 0; min-height: 100vh; }
+        .admin-content { margin-left: 0; min-height: 100vh; padding-top: 4rem; }
         .bg-gradient-vino { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
-        .sidebar-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 150; }
+        
+        /* Botón hamburguesa a la derecha */
+        .sidebar-toggle { 
+            position: fixed; 
+            top: 1rem; 
+            right: 1rem; 
+            z-index: 150; 
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .sidebar-toggle.hidden { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(0.8);
+        }
+        
+        /* Overlay para cerrar sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sidebar-overlay.hidden { display: none; }
+        
+        /* Tarjetas de usuario en móvil */
+        .user-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
         
         /* Select de rol */
         .rol-select {
@@ -163,18 +244,31 @@ block contenido
         
         @media (min-width: 769px) {
             .admin-sidebar { transform: translateX(0); }
-            .admin-content { margin-left: 280px; }
+            .admin-content { margin-left: 280px; padding-top: 0; }
             .sidebar-toggle { display: none; }
+            .sidebar-overlay { display: none; }
         }
 
     script.
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const sidebar = document.getElementById('sidebar');
-        if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', () => { sidebar.classList.toggle('open'); });
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768) {
-                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) sidebar.classList.remove('open');
-                }
-            });
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.remove('hidden');
+            sidebarOverlay.classList.add('active');
+            sidebarToggle.classList.add('hidden');
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+            sidebarToggle.classList.remove('hidden');
+        }
+        
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            sidebarToggle.addEventListener('click', openSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
         }

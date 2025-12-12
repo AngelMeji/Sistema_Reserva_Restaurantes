@@ -93,7 +93,7 @@ const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas)
     if (mesasConCapacidad.length === 0) {
         return {
             mesa: null,
-            error: `No hay mesas con capacidad para ${numero_personas} personas. Por favor, intente con un grupo más pequeño o contacte con el restaurante.`,
+            error: "No hay mesas que tengan esa capacidad",
             tipoError: "sin_capacidad"
         };
     }
@@ -225,7 +225,7 @@ const crearReserva = async (req, res) => {
 
         //si recepcionista hace la reserva el estado se pondra automaticamente en confirmado
         const estadoFinal = usuarioReserva.rol === "cliente" ? "pendiente" : "confirmada";
-        
+
         // Crear la reserva con la mesa asignada
         const nuevaReserva = await Reserva.create({
             id_usuario: usuarioReserva.id,

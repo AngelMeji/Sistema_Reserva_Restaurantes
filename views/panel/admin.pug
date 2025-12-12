@@ -4,7 +4,10 @@ include ../mixins/errores
 block contenido
     .admin-panel-container.flex.min-h-screen.bg-crema
         
-        //- Botón hamburguesa para móviles
+        //- Overlay para cerrar sidebar en móvil
+        #sidebar-overlay.sidebar-overlay.hidden
+        
+        //- Botón hamburguesa para móviles (derecha)
         button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
             svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
                 path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
@@ -160,7 +163,7 @@ block contenido
             top: 0;
             height: 100vh;
             overflow-y: auto;
-            z-index: 100;
+            z-index: 200;
         }
         
         .sidebar-header {
@@ -207,6 +210,7 @@ block contenido
         .admin-content {
             margin-left: 280px;
             min-height: 100vh;
+            padding-top: 4rem;
         }
         
         /* Tarjetas de estadísticas */
@@ -294,10 +298,39 @@ block contenido
         .sidebar-toggle {
             position: fixed;
             top: 1rem;
-            left: 1rem;
+            right: 1rem;
             z-index: 150;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
+        
+        .sidebar-toggle.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
+        }
+        
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Overlay para cerrar sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sidebar-overlay.hidden { display: none; }
         
         .sidebar-toggle:hover {
             transform: scale(1.1);
@@ -327,24 +360,35 @@ block contenido
             .sidebar-toggle {
                 display: none;
             }
+            .sidebar-overlay {
+                display: none;
+            }
+            .admin-content {
+                padding-top: 0;
+            }
         }
     
     script.
         // Toggle sidebar en móviles
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
         
-        if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('open');
-            });
-            
-            // Cerrar sidebar al hacer click fuera de él
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768) {
-                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                        sidebar.classList.remove('open');
-                    }
-                }
-            });
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.remove('hidden');
+            sidebarOverlay.classList.add('active');
+            sidebarToggle.classList.add('hidden');
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+            sidebarToggle.classList.remove('hidden');
+        }
+        
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            sidebarToggle.addEventListener('click', openSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
         }
