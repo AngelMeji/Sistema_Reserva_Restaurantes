@@ -12,6 +12,16 @@
     --font-sans: "Lato", sans-serif;
 }
 
+/* Fix para evitar scroll horizontal en móvil */
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+.overflow-x-hidden {
+    overflow-x: hidden;
+}
+
 /* Animación para mensajes de error */
 @keyframes slideDown {
     from {
