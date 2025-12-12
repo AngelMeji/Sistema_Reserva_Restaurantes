@@ -26,7 +26,11 @@ const validarReserva = [
         .notEmpty().withMessage("La hora es obligatoria"),
 
     body("numero_personas")
-        .isInt({ min: 1, max: 20 }).withMessage("El número de personas debe estar entre 1 y 20"),
+        .isInt({ min: 1, max: 8 }).withMessage("El número de personas debe estar entre 1 y 8"),
+
+    body("zona")
+        .notEmpty().withMessage("Debes seleccionar una zona para tu mesa")
+        .isIn(['interior', 'terraza', 'barra', 'privado']).withMessage("Zona no válida"),
 
     body("dispositivo")
         .optional()

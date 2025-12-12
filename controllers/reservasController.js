@@ -58,13 +58,23 @@ const mostrarFormulario = async (req, res) => {
 };
 
 /**
- * Busca una mesa disponible para la fecha, hora y número de personas especificados
+ * Busca una mesa disponible para la fecha, hora, número de personas y zona especificados
  * @param {string} fecha_reserva - Fecha de la reserva (YYYY-MM-DD)
  * @param {string} hora_inicio - Hora de inicio de la reserva (HH:MM)
  * @param {number} numero_personas - Número de personas para la reserva
+ * @param {string} zona - Zona preferida para la mesa (interior, terraza, barra, privado)
  * @returns {Object} - { mesa: Mesa|null, error: string|null, tipoError: string|null }
  */
-const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas) => {
+const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas, zona) => {
+    // Nombres amigables para las zonas
+    const zonasNombres = {
+        interior: "Interior",
+        terraza: "Terraza",
+        barra: "Barra",
+        privado: "Privado"
+    };
+    const zonaNombre = zonasNombres[zona] || zona;
+
     // 1. Verificar si existen mesas en el sistema
     const totalMesas = await Mesa.count();
 
@@ -76,10 +86,27 @@ const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas)
         };
     }
 
-    // 2. Buscar mesas activas con capacidad suficiente
+    // 2. Verificar si existen mesas en la zona solicitada
+    const mesasEnZona = await Mesa.count({
+        where: {
+            estado: "activa",
+            zona: zona
+        }
+    });
+
+    if (mesasEnZona === 0) {
+        return {
+            mesa: null,
+            error: `No hay mesas disponibles en la zona "${zonaNombre}". Por favor, selecciona otra zona.`,
+            tipoError: "sin_zona"
+        };
+    }
+
+    // 3. Buscar mesas activas en la zona con capacidad suficiente
     const mesasConCapacidad = await Mesa.findAll({
         where: {
             estado: "activa",
+            zona: zona,
             capacidad: {
                 [Op.gte]: numero_personas
             }
@@ -91,14 +118,25 @@ const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas)
     });
 
     if (mesasConCapacidad.length === 0) {
+        // Buscar la capacidad máxima disponible en la zona para informar al usuario
+        const mesaMaxCapacidad = await Mesa.findOne({
+            where: {
+                estado: "activa",
+                zona: zona
+            },
+            order: [["capacidad", "DESC"]]
+        });
+
+        const capacidadMax = mesaMaxCapacidad ? mesaMaxCapacidad.capacidad : 0;
+
         return {
             mesa: null,
-            error: "No hay mesas que tengan esa capacidad",
+            error: `No hay mesas con capacidad para ${numero_personas} personas en la zona "${zonaNombre}". La capacidad máxima disponible en esta zona es de ${capacidadMax} personas.`,
             tipoError: "sin_capacidad"
         };
     }
 
-    // 3. Calcular hora de fin estimada (90 minutos después - igual que en el hook del modelo)
+    // 4. Calcular hora de fin estimada (90 minutos después - igual que en el hook del modelo)
     const [h, m] = hora_inicio.split(":").map(Number);
     const inicioDate = new Date();
     inicioDate.setHours(h, m, 0, 0);
@@ -109,7 +147,7 @@ const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas)
     const hora_fin_estimada = `${finDate.getHours().toString().padStart(2, "0")}:${finDate.getMinutes().toString().padStart(2, "0")}:00`;
     const hora_inicio_formatted = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`;
 
-    // 4. Para cada mesa con capacidad, verificar si está disponible en el horario
+    // 5. Para cada mesa con capacidad, verificar si está disponible en el horario
     for (const mesa of mesasConCapacidad) {
         // Buscar reservas que se solapan con el horario solicitado
         const reservasConflictivas = await Reserva.count({
@@ -147,10 +185,10 @@ const buscarMesaDisponible = async (fecha_reserva, hora_inicio, numero_personas)
         }
     }
 
-    // 5. Si llegamos aquí, todas las mesas están ocupadas
+    // 6. Si llegamos aquí, todas las mesas en la zona están ocupadas
     return {
         mesa: null,
-        error: `Todas las mesas están reservadas para el ${fecha_reserva} a las ${hora_inicio}. Por favor, seleccione otro horario o fecha.`,
+        error: `Todas las mesas de la zona "${zonaNombre}" están reservadas para el ${fecha_reserva} a las ${hora_inicio}. Por favor, seleccione otro horario, fecha o zona.`,
         tipoError: "todas_ocupadas"
     };
 };
@@ -184,6 +222,7 @@ const crearReserva = async (req, res) => {
             fecha_reserva,
             hora_inicio,
             numero_personas,
+            zona,
             observaciones,
             canal,
             dispositivo,
@@ -201,11 +240,12 @@ const crearReserva = async (req, res) => {
             });
         }
 
-        // Buscar mesa disponible automáticamente
+        // Buscar mesa disponible automáticamente (filtrada por zona)
         const { mesa, error, tipoError } = await buscarMesaDisponible(
             fecha_reserva,
             hora_inicio,
-            parseInt(numero_personas)
+            parseInt(numero_personas),
+            zona
         );
 
         // Si hay error (no hay mesas disponibles), mostrar mensaje al usuario
