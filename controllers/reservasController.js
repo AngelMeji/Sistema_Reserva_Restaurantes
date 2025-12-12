@@ -226,9 +226,38 @@ const crearReserva = async (req, res) => {
         //si recepcionista hace la reserva el estado se pondra automaticamente en confirmado
         const estadoFinal = usuarioReserva.rol === "cliente" ? "pendiente" : "confirmada";
 
-        // Crear la reserva con la mesa asignada
+        // Determinar el usuario de la reserva
+        let usuarioParaReserva = usuarioReserva;
+
+        // Si es recepcionista o admin, buscar o crear usuario cliente con los datos del formulario
+        if (usuarioReserva.rol === "recepcionista" || usuarioReserva.rol === "admin") {
+            // Buscar si existe un usuario con ese email
+            let clienteExistente = await Usuario.findOne({ where: { email } });
+
+            if (clienteExistente) {
+                // Usar el usuario existente
+                usuarioParaReserva = clienteExistente;
+            } else {
+                // Crear un nuevo usuario cliente con los datos del formulario
+                const crypto = await import('crypto');
+                const passwordTemporal = crypto.randomBytes(16).toString('hex');
+
+                clienteExistente = await Usuario.create({
+                    nombre,
+                    email,
+                    telefono: telefono || null,
+                    password: passwordTemporal, // Password temporal (el cliente puede recuperarlo)
+                    rol: "cliente",
+                    estado: "activo",
+                    notas: `Cliente registrado por ${usuarioReserva.rol}: ${usuarioReserva.nombre}`
+                });
+                usuarioParaReserva = clienteExistente;
+            }
+        }
+
+        // Crear la reserva con el usuario correcto (cliente real, no el recepcionista)
         const nuevaReserva = await Reserva.create({
-            id_usuario: usuarioReserva.id,
+            id_usuario: usuarioParaReserva.id,
             id_mesa: mesa.id, // Asignar la mesa encontrada
             fecha_reserva,
             hora_inicio,
@@ -237,7 +266,7 @@ const crearReserva = async (req, res) => {
             estado: estadoFinal,
             canal: canal || "web",
             observaciones: observaciones || null, // Guardar solo lo que escribió el usuario
-            creado_por: usuarioReserva.id,
+            creado_por: usuarioReserva.id, // Quien creó la reserva (puede ser recepcionista)
             dispositivo: dispositivo || "desktop",
         });
 
