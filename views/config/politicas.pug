@@ -1,0 +1,280 @@
+extends ../layout/admin
+
+block contenido
+    .admin-panel-container.flex.min-h-screen.bg-crema
+        
+        //- Overlay para cerrar sidebar en móvil
+        #sidebar-overlay.sidebar-overlay.hidden
+        
+        //- Botón hamburguesa para móviles (derecha)
+        button#sidebar-toggle.sidebar-toggle.bg-vino.text-dorado.p-3.rounded-full.shadow-xl(class="lg:hidden")
+            svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
+        
+        //- Sidebar izquierdo
+        aside#sidebar.admin-sidebar.bg-vino.text-crema.flex.flex-col.shadow-2xl
+            // Logo y título
+            .sidebar-header.p-6.border-b-2.border-dorado
+                h2.text-2xl.font-serif.font-bold.text-dorado Panel de Control
+                p.text-sm.mt-2.opacity-90 #{usuario.nombre}
+                p.text-xs.opacity-70.capitalize #{usuario.rol}
+            
+            //- Navegación
+            nav.sidebar-nav.flex-1.p-4.space-y-2
+                // Dashboard
+                a.nav-item(href="/panel/admin")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
+                    span Dashboard
+                
+                //- Reservas
+                a.nav-item(href="/admin/reservas")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                    span Gestionar Reservas
+                
+                //- Mesas
+                if usuario.rol !== "mesero"
+                    a.nav-item(href="/mesas")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z")
+                        span Gestión de Mesas
+                
+                //- Usuarios (solo admin)
+                if usuario.rol === "admin"
+                    a.nav-item(href="/admin/usuarios")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
+                        span Usuarios del Sistema
+
+                //- Reportes (solo admin)
+                if usuario.rol === "admin"
+                    a.nav-item(href="/admin/reportes")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m2 10V7m2 10V7m2 10h2a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2h2m4 2v2m3-2v2M9 13h3")
+                        span Reportes
+
+                //- Configuración (solo admin)
+                if usuario.rol === "admin"
+                    a.nav-item.active(href="/config")
+                        svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                        span Configuración
+                
+                //- Pagina principal
+                a.nav-item(href="/")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
+                    span Regresar a Inicio
+            
+            //- Footer del sidebar
+            .sidebar-footer.p-4.border-t-2.border-dorado
+                a.nav-item.logout(href="/auth/cerrar-sesion")
+                    svg.nav-icon(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")
+                    span Cerrar Sesión
+        
+        //- Contenido principal
+        main.admin-content.flex-1.p-8
+            //- Mensajes
+            if messages.error
+                each m in messages.error
+                    .bg-red-100.border-l-4.border-red-500.text-red-700.p-4.mb-6.rounded-r-lg.flex.items-center.gap-3
+                        span.text-xl ❌
+                        p.font-semibold= m
+            if messages.exito
+                each m in messages.exito
+                    .bg-green-100.border-l-4.border-green-500.text-green-700.p-4.mb-6.rounded-r-lg.flex.items-center.gap-3
+                        span.text-xl ✅
+                        p.font-semibold= m
+
+            //- Encabezado con botón de regresar
+            .mb-8
+                a.inline-flex.items-center.gap-2.text-vino.hover_text-dorado.transition-colors.mb-4(href="/config")
+                    svg.w-5.h-5(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
+                    span.font-semibold Volver a Configuración
+                h1.text-4xl.font-serif.text-vino.font-bold.mb-2 📋 Políticas de Reserva
+                p.text-lg.text-gray-700 Configura las reglas y límites para las reservas del restaurante
+
+            //- SECCIÓN: Políticas de Reserva
+            .bg-white.rounded-xl.shadow-xl.overflow-hidden.max-w-3xl
+                .bg-gradient-dorado.text-white.px-6.py-5
+                    .flex.items-center.gap-3
+                        span.text-2xl 📜
+                        div
+                            h2.text-xl.font-serif.font-bold Políticas de Reserva
+                            p.text-sm.opacity-80 Reglas y límites para las reservas
+                
+                .p-6
+                    form(method="post" action="/config/politicas/actualizar")
+                        input(type="hidden" name="_csrf" value=csrfToken)
+                        
+                        .space-y-6
+                            //- Tiempo de cancelación
+                            .policy-card.p-4.bg-gray-50.rounded-xl.border-2.border-gray-200
+                                .flex.items-start.gap-4
+                                    .w-12.h-12.rounded-xl.bg-red-100.flex.items-center.justify-center.flex-shrink-0
+                                        span.text-xl ⏰
+                                    div.flex-1
+                                        label.block.font-semibold.text-gray-800.mb-1 Tiempo Mínimo de Cancelación
+                                        p.text-sm.text-gray-500.mb-3 Minutos antes de la reserva que el cliente puede cancelar
+                                        .flex.items-center.gap-3
+                                            input.w-24.px-4.py-3.border-2.border-gray-200.rounded-lg.text-center.font-bold.text-lg.focus_border-vino.focus_outline-none(type="number" name="tiempo_cancelacion_min" value=politica.tiempo_cancelacion_min min="0" required)
+                                            span.text-gray-600.font-medium minutos
+                            
+                            //- Tiempo de anticipación
+                            .policy-card.p-4.bg-gray-50.rounded-xl.border-2.border-gray-200
+                                .flex.items-start.gap-4
+                                    .w-12.h-12.rounded-xl.bg-blue-100.flex.items-center.justify-center.flex-shrink-0
+                                        span.text-xl 🕐
+                                    div.flex-1
+                                        label.block.font-semibold.text-gray-800.mb-1 Anticipación Mínima
+                                        p.text-sm.text-gray-500.mb-3 Horas de anticipación mínimas para hacer una reserva
+                                        .flex.items-center.gap-3
+                                            input.w-24.px-4.py-3.border-2.border-gray-200.rounded-lg.text-center.font-bold.text-lg.focus_border-vino.focus_outline-none(type="number" name="tiempo_anticipacion_horas" value=politica.tiempo_anticipacion_horas min="0" required)
+                                            span.text-gray-600.font-medium horas
+                            
+                            //- Máximo de personas
+                            .policy-card.p-4.bg-gray-50.rounded-xl.border-2.border-gray-200
+                                .flex.items-start.gap-4
+                                    .w-12.h-12.rounded-xl.bg-green-100.flex.items-center.justify-center.flex-shrink-0
+                                        span.text-xl 👥
+                                    div.flex-1
+                                        label.block.font-semibold.text-gray-800.mb-1 Máximo de Personas por Reserva
+                                        p.text-sm.text-gray-500.mb-3 Límite de comensales por reserva individual
+                                        .flex.items-center.gap-3
+                                            input.w-24.px-4.py-3.border-2.border-gray-200.rounded-lg.text-center.font-bold.text-lg.focus_border-vino.focus_outline-none(type="number" name="max_personas_por_reserva" value=politica.max_personas_por_reserva min="1" required)
+                                            span.text-gray-600.font-medium personas
+                            
+                            //- Duración por defecto
+                            .policy-card.p-4.bg-gray-50.rounded-xl.border-2.border-gray-200
+                                .flex.items-start.gap-4
+                                    .w-12.h-12.rounded-xl.bg-purple-100.flex.items-center.justify-center.flex-shrink-0
+                                        span.text-xl ⏱️
+                                    div.flex-1
+                                        label.block.font-semibold.text-gray-800.mb-1 Duración por Defecto
+                                        p.text-sm.text-gray-500.mb-3 Tiempo estimado de cada reserva
+                                        .flex.items-center.gap-3
+                                            input.w-24.px-4.py-3.border-2.border-gray-200.rounded-lg.text-center.font-bold.text-lg.focus_border-vino.focus_outline-none(type="number" name="duracion_default_min" value=politica.duracion_default_min min="15" step="15" required)
+                                            span.text-gray-600.font-medium minutos
+                        
+                        //- Botón guardar
+                        .mt-8
+                            button.w-full.bg-gradient-to-r.from-vino.to-red-700.text-white.py-4.px-6.rounded-xl.font-bold.text-lg.hover_shadow-xl.transition-all.flex.items-center.justify-center.gap-3(type="submit")
+                                svg.w-6.h-6(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+                                | Guardar Políticas
+
+            //- Información adicional
+            .mt-8.bg-white.rounded-xl.shadow-lg.p-6.max-w-3xl
+                .flex.items-start.gap-4
+                    .w-12.h-12.rounded-xl.bg-blue-100.flex.items-center.justify-center.flex-shrink-0
+                        span.text-xl 💡
+                    div
+                        h3.font-bold.text-gray-800.mb-2 Información Importante
+                        ul.text-sm.text-gray-600.space-y-2
+                            li.flex.items-start.gap-2
+                                span.text-green-500 ✓
+                                | Las políticas de reserva ayudan a gestionar mejor la capacidad del restaurante.
+                            li.flex.items-start.gap-2
+                                span.text-green-500 ✓
+                                | El tiempo de cancelación define cuándo los clientes pueden cancelar sin penalización.
+                            li.flex.items-start.gap-2
+                                span.text-green-500 ✓
+                                | La anticipación mínima evita reservas de último momento que no puedan atenderse.
+                            li.flex.items-start.gap-2
+                                span.text-green-500 ✓
+                                | Los cambios se aplican inmediatamente para nuevas reservas.
+
+    style.
+        /* Estilos base */
+        .admin-panel-container { margin: 0; min-height: 100vh; }
+        .admin-sidebar { width: 280px; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 200; transform: translateX(-100%); transition: transform 0.3s ease; }
+        .admin-sidebar.open { transform: translateX(0); }
+        .sidebar-header { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.5rem; color: #F2EADF; font-weight: 500; transition: all 0.3s ease; cursor: pointer; }
+        .nav-item:hover { background: rgba(199, 168, 108, 0.15); transform: translateX(4px); color: #C7A86C; }
+        .nav-item.active { background: linear-gradient(90deg, rgba(199, 168, 108, 0.2) 0%, rgba(199, 168, 108, 0.05) 100%); border-left: 3px solid #C7A86C; color: #C7A86C; }
+        .nav-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
+        .admin-content { margin-left: 0; min-height: 100vh; padding-top: 4rem; }
+        
+        .bg-gradient-vino { background: linear-gradient(135deg, #6E1825 0%, #8B2030 100%); }
+        .bg-gradient-dorado { background: linear-gradient(135deg, #C7A86C 0%, #D4B87A 100%); }
+        
+        .sidebar-toggle { 
+            position: fixed; 
+            top: 1rem; 
+            right: 1rem; 
+            z-index: 150; 
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .sidebar-toggle.hidden { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(0.8);
+        }
+        
+        /* Overlay para cerrar sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sidebar-overlay.hidden { display: none; }
+        
+        .policy-card { transition: all 0.3s ease; }
+        .policy-card:hover { border-color: #C7A86C; transform: translateX(4px); }
+        
+        input[type="number"] {
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus {
+            border-color: #6E1825;
+            box-shadow: 0 0 0 3px rgba(110, 24, 37, 0.1);
+        }
+        
+        @media (min-width: 769px) {
+            .admin-sidebar { transform: translateX(0); }
+            .admin-content { margin-left: 280px; padding-top: 0; }
+            .sidebar-toggle { display: none; }
+            .sidebar-overlay { display: none; }
+        }
+
+    script.
+        // Toggle sidebar en móviles
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.remove('hidden');
+            sidebarOverlay.classList.add('active');
+            sidebarToggle.classList.add('hidden');
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+            sidebarToggle.classList.remove('hidden');
+        }
+        
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            sidebarToggle.addEventListener('click', openSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
+        }
