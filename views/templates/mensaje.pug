@@ -1,0 +1,24 @@
+extends ../layout/index
+
+block contenido
+    .py-10
+        h1.text-4xl.my-10.font-serif.font-bold.text-center.text-vino Ristorante Tradizionale
+        
+        .mt-8.mx-auto.max-w-md
+            .bg-white.py-8.px-6.shadow-2xl.rounded-lg.text-center
+                if error
+                    //- Error icon
+                    .mx-auto.w-16.h-16.bg-red-100.rounded-full.flex.items-center.justify-center.mb-6
+                        svg.w-8.h-8.text-red-600(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+                    h2.text-xl.font-serif.font-bold.text-red-600.mb-4 ¡Error!
+                    p.text-gray-600.mb-6= mensaje
+                else
+                    //- Success icon
+                    .mx-auto.w-16.h-16.bg-green-100.rounded-full.flex.items-center.justify-center.mb-6
+                        svg.w-8.h-8.text-green-600(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+                    h2.text-xl.font-serif.font-bold.text-green-600.mb-4 ¡Éxito!
+                    p.text-gray-600.mb-6= mensaje
+
+                a.inline-block.bg-vino.hover_bg-opacity-90.text-white.font-bold.py-3.px-8.cursor-pointer.rounded-md.transition-all.duration-300.shadow-md.uppercase.text-sm.tracking-wider(href="/auth/login") Ir a Iniciar Sesión

@@ -136,8 +136,10 @@ const resetPassword = async (req, res) => {
 
   //Mostrar el mensaje
   res.render("templates/mensaje", {
-    tituloPagina: "Restablece la contraseña",
-    mensaje: "Hemos enviado un correo de restablecer la contraseña",
+    pagina: "Correo Enviado",
+    tituloPagina: "Revisa tu correo",
+    mensaje: "Hemos enviado un enlace a tu correo electrónico para restablecer tu contraseña.",
+    error: false,
   });
 };
 
@@ -247,19 +249,30 @@ const registrar = async (req, res) => {
 const comprobarToken = async (req, res) => {
   const { token } = req.params;
 
-  // Validar el token sea verdadero
+  // Validar que el token exista y sea válido
+  if (!token) {
+    return res.render("templates/mensaje", {
+      pagina: "Error",
+      tituloPagina: "Enlace Inválido",
+      mensaje: "El enlace de recuperación no es válido.",
+      error: true,
+    });
+  }
+
   const usuario = await Usuario.findOne({ where: { token } });
 
   if (!usuario) {
-    return res.render("auth/confirmar-cuenta", {
-      tituloPagina: "Restablece tu contraseña",
-      mensaje: "Hubo un error al validar el token",
+    return res.render("templates/mensaje", {
+      pagina: "Error",
+      tituloPagina: "Token Inválido",
+      mensaje: "El enlace de recuperación ha expirado o no es válido. Por favor, solicita uno nuevo.",
       error: true,
     });
   }
 
   // Mostrar formulario para validar la contraseña
   res.render("auth/reset-password", {
+    pagina: "Nueva Contraseña",
     tituloPagina: "Escribe tu nueva contraseña",
     csrfToken: req.csrfToken(),
   });
@@ -274,7 +287,7 @@ const nuevoPassword = async (req, res) => {
 
   await check("repeat_password")
     .equals(req.body.password)
-    .withMessage("La contraseña no es igual")
+    .withMessage("Las contraseñas no coinciden")
     .run(req);
 
   let resultado = validationResult(req);
@@ -283,6 +296,7 @@ const nuevoPassword = async (req, res) => {
   if (!resultado.isEmpty()) {
     // Errores
     return res.render("auth/reset-password", {
+      pagina: "Nueva Contraseña",
       tituloPagina: "Restablece Contraseña",
       csrfToken: req.csrfToken(),
       errores: resultado.array(),
@@ -295,18 +309,29 @@ const nuevoPassword = async (req, res) => {
   // Identificar el usuario para hacer el cambio
   const usuario = await Usuario.findOne({ where: { token } });
 
-  // Hashear el password
-  const salt = await bcrypt.genSalt(10);
-  usuario.password = await bcrypt.hash(password, salt);
+  // Validar que el usuario exista con ese token
+  if (!usuario) {
+    return res.render("templates/mensaje", {
+      pagina: "Error",
+      tituloPagina: "Token Inválido",
+      mensaje: "El enlace de recuperación ha expirado o no es válido. Por favor, solicita uno nuevo.",
+      error: true,
+    });
+  }
+
+  // Asignar nueva contraseña (el hook beforeSave del modelo la hashea automáticamente)
+  usuario.password = password;
   usuario.token = null;
 
   // Guardar en la DB
   await usuario.save();
 
-  res.render("auth/confirmar-cuenta", {
-    tituloPagina: "Contraseña cambiada",
-    csrfToken: req.csrfToken(),
-    mensaje: "La contraseña se cambio correctamente",
+
+  res.render("templates/mensaje", {
+    pagina: "Éxito",
+    tituloPagina: "Contraseña Actualizada",
+    mensaje: "Tu contraseña ha sido cambiada correctamente. Ya puedes iniciar sesión.",
+    error: false,
   });
 };
 

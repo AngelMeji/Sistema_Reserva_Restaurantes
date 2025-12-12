@@ -50,8 +50,11 @@ const Usuario = db.define(
         hooks: {
             beforeSave: async (usuario) => {
                 if (usuario.changed("password")) {
+                    console.log("Hook beforeSave: Hasheando password...");
+                    console.log("Password antes de hashear:", usuario.password.substring(0, 10) + "...");
                     const salt = await bcrypt.genSalt(10);
                     usuario.password = await bcrypt.hash(usuario.password, salt);
+                    console.log("Password hasheado:", usuario.password.substring(0, 20) + "...");
                 }
             },
         },
