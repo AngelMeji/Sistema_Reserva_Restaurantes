@@ -20,6 +20,22 @@ const Reserva = db.define(
             allowNull: true, // Se asigna después si no hay mesa
         },
 
+        // Datos del cliente desde el formulario (pueden diferir del usuario)
+        nombre_cliente: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
+        email_cliente: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
+        telefono_cliente: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
         fecha_reserva: {
             type: DataTypes.DATEONLY,
             allowNull: false,

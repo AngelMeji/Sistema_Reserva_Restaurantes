@@ -97,7 +97,11 @@ block contenido
                                         .w-10.h-10.rounded-lg.bg-gradient-to-br.from-vino.to-red-800.flex.items-center.justify-center.shadow-md
                                             span.text-white.font-bold.text-xs ##{reserva.id_reserva}
                                         div
-                                            if reserva.usuario
+                                            //- Mostrar datos del formulario, con fallback a datos del usuario
+                                            if reserva.nombre_cliente
+                                                h3.font-bold.text-gray-900.text-sm #{reserva.nombre_cliente}
+                                                p.text-xs.text-gray-500 #{reserva.email_cliente || (reserva.usuario ? reserva.usuario.email : '')}
+                                            else if reserva.usuario
                                                 h3.font-bold.text-gray-900.text-sm #{reserva.usuario.nombre}
                                                 p.text-xs.text-gray-500 #{reserva.usuario.email}
                                             else
@@ -148,7 +152,7 @@ block contenido
                                 .flex.gap-2.pt-2.border-t.border-gray-100
                                     button.flex-1.bg-blue-500.hover_bg-blue-600.text-white.px-3.py-2.rounded-lg.text-xs.font-semibold.transition-colors(
                                         type="button"
-                                        onclick=`abrirModalReagendar(${reserva.id_reserva}, '${reserva.fecha_reserva}', '${reserva.hora_inicio}', '${reserva.usuario ? reserva.usuario.nombre : "Cliente"}')`
+                                        onclick=`abrirModalReagendar(${reserva.id_reserva}, '${reserva.fecha_reserva}', '${reserva.hora_inicio}', '${reserva.nombre_cliente || (reserva.usuario ? reserva.usuario.nombre : "Cliente")}')`
                                     )
                                         | Reagendar
                                     button.flex-1.bg-red-500.hover_bg-red-600.text-white.px-3.py-2.rounded-lg.text-xs.font-semibold.transition-colors(
@@ -181,7 +185,17 @@ block contenido
                                         td.px-6.py-4.whitespace-nowrap.text-sm.font-medium.text-gray-900 ##{reserva.id_reserva}
                                         
                                         td.px-6.py-4.whitespace-nowrap
-                                            if reserva.usuario
+                                            //- Mostrar datos del formulario, con fallback a datos del usuario
+                                            if reserva.nombre_cliente
+                                                .flex.items-center
+                                                    .ml-0
+                                                        .text-sm.font-medium.text-gray-900 #{reserva.nombre_cliente}
+                                                        .text-sm.text-gray-500 #{reserva.email_cliente || (reserva.usuario ? reserva.usuario.email : '')}
+                                                        if reserva.telefono_cliente
+                                                            .text-xs.text-gray-400 #{reserva.telefono_cliente}
+                                                        else if reserva.usuario && reserva.usuario.telefono
+                                                            .text-xs.text-gray-400 #{reserva.usuario.telefono}
+                                            else if reserva.usuario
                                                 .flex.items-center
                                                     .ml-0
                                                         .text-sm.font-medium.text-gray-900 #{reserva.usuario.nombre}
@@ -258,7 +272,7 @@ block contenido
                                             .flex.gap-2.flex-wrap
                                                 button.btn-reagendar.bg-blue-500.hover_bg-blue-600.text-white.px-3.py-1.rounded-lg.text-xs.font-semibold.transition-colors(
                                                     type="button"
-                                                    onclick=`abrirModalReagendar(${reserva.id_reserva}, '${reserva.fecha_reserva}', '${reserva.hora_inicio}', '${reserva.usuario ? reserva.usuario.nombre : "Cliente"}')`
+                                                    onclick=`abrirModalReagendar(${reserva.id_reserva}, '${reserva.fecha_reserva}', '${reserva.hora_inicio}', '${reserva.nombre_cliente || (reserva.usuario ? reserva.usuario.nombre : "Cliente")}')`
                                                     title="Reagendar reserva"
                                                 )
                                                     | Reagendar

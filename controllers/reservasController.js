@@ -299,6 +299,9 @@ const crearReserva = async (req, res) => {
         const nuevaReserva = await Reserva.create({
             id_usuario: usuarioParaReserva.id,
             id_mesa: mesa.id, // Asignar la mesa encontrada
+            nombre_cliente: nombre, // Guardar datos del formulario
+            email_cliente: email,
+            telefono_cliente: telefono || null,
             fecha_reserva,
             hora_inicio,
             hora_fin: null,

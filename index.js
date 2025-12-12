@@ -52,7 +52,7 @@ app.use(csurf({ cookie: true }));
 // Conexion a la DB
 try {
   await db.authenticate();
-  await db.sync();
+  await db.sync({ alter: true }); // alter: true para añadir nuevas columnas
   console.log("La conexion es correcta a la DB");
   isDbConnected = true;
 } catch (error) {
